@@ -140,7 +140,7 @@
       const [key, setKey] = useState("");
       const [status, setStatus] = useState(null);
       function validateKeyFormat(k) {
-        const re = /^(UTP|UP)-[A-Z0-9]{4}-\\d{4}$/;
+        const re = /^(UTP|UP)-[A-Z0-9]{4}-\d{4}$/;
         return re.test(k.trim().toUpperCase());
       }
       const onRedeem = () => { setStatus(validateKeyFormat(key) ? "ok" : "error"); };
