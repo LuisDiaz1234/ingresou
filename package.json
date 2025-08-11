@@ -1,0 +1,8 @@
+{
+  "name": "ingresou-static-with-api",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "@supabase/supabase-js": "^2.43.1"
+  }
+}
