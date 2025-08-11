@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>IngresoU — Panel de Llaves</title>
+  <meta name="robots" content="noindex,nofollow"/>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-900">
+  <div class="mx-auto max-w-2xl p-6">
+    <h1 class="text-2xl font-bold">Panel de Llaves — IngresoU</h1>
+    <p class="text-sm text-gray-600">Emite una KEY y guárdala en la base de datos.</p>
+    <div class="mt-6 rounded-2xl border bg-white p-5">
+      <div class="grid gap-3 md:grid-cols-2">
+        <label class="text-sm">Universidad
+          <select id="uni" class="w-full rounded-xl border px-3 py-2">
+            <option value="UTP">UTP</option>
+            <option value="UP">UP</option>
+          </select>
+        </label>
+        <label class="text-sm">Plan
+          <select id="plan" class="w-full rounded-xl border px-3 py-2">
+            <option>Basic 30d — $14</option>
+            <option>Pro 60d — $29</option>
+            <option>Temporada 90d — $39</option>
+          </select>
+        </label>
+        <label class="text-sm md:col-span-2">Correo del estudiante
+          <input id="email" type="email" class="w-full rounded-xl border px-3 py-2" placeholder="email@ejemplo.com"/>
+        </label>
+      </div>
+      <button id="gen" class="mt-4 rounded-xl bg-indigo-600 px-4 py-2 text-white">Generar KEY</button>
+      <div id="out" class="mt-4 hidden rounded-xl bg-gray-100 p-4">
+        <div class="text-sm text-gray-700">KEY generada: <b id="code"></b></div>
+        <div class="mt-3 text-sm">Texto sugerido para el correo:</div>
+        <textarea id="emailText" class="mt-1 w-full rounded-xl border p-2 text-sm" rows="6"></textarea>
+        <div class="mt-4 border-t pt-4">
+          <h3 class="font-semibold">Guardar en la base de datos (requiere contraseña admin)</h3>
+          <div class="mt-2 grid gap-2 md:grid-cols-3">
+            <input id="adminPass" type="password" class="rounded-xl border px-3 py-2 md:col-span-2" placeholder="Contraseña admin"/>
+            <button id="saveDb" class="rounded-xl bg-black px-4 py-2 text-white">Emitir en DB</button>
+          </div>
+          <p id="dbMsg" class="mt-2 text-sm"></p>
+        </div>
+        <div class="mt-3 flex gap-2">
+          <button id="copyKey" class="rounded-xl border px-4 py-2">Copiar KEY</button>
+          <button id="copyMail" class="rounded-xl border px-4 py-2">Copiar texto del correo</button>
+        </div>
+      </div>
+    </div>
+  </div>
+<script>
+function rand4(){const chars="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";let s="";for(let i=0;i<4;i++)s+=chars[Math.floor(Math.random()*chars.length)];return s;}
+function rand4digits(){return String(Math.floor(1000+Math.random()*9000));}
+let lastCode=null;
+document.getElementById("gen").addEventListener("click",()=>{
+  const uni=document.getElementById("uni").value;
+  const plan=document.getElementById("plan").value;
+  const email=document.getElementById("email").value||"(sin correo)";
+  const code=`${uni}-${rand4()}-${rand4digits()}`;
+  lastCode=code;
+  const now=new Date().toLocaleString();
+  const text=`¡Gracias por tu pago!\n\nTu KEY de acceso es: ${code}\nUniversidad: ${uni}\nPlan: ${plan}\n\n¿Cómo activarla?\n1) Entra a la web de IngresoU.\n2) Ve a la sección "KEY" y pega el código.\n3) ¡Listo! Tu plan quedará activo.\n\nSoporte: leonardodiaz9324@gmail.com\nEmitida: ${now}\nEmail del estudiante: ${email}`;
+  document.getElementById("code").textContent=code;
+  document.getElementById("emailText").value=text;
+  document.getElementById("out").classList.remove("hidden");
+});
+document.getElementById("copyKey").addEventListener("click",()=>{ if(lastCode) navigator.clipboard.writeText(lastCode); });
+document.getElementById("copyMail").addEventListener("click",()=>{ navigator.clipboard.writeText(document.getElementById("emailText").value); });
+document.getElementById("saveDb").addEventListener("click", async ()=>{
+  const uni=document.getElementById("uni").value;
+  const plan=document.getElementById("plan").value;
+  const email=document.getElementById("email").value;
+  const pass=document.getElementById("adminPass").value;
+  const msg=document.getElementById("dbMsg");
+  if(!lastCode){ msg.textContent="Genera una KEY primero."; msg.className="mt-2 text-sm text-red-700"; return; }
+  msg.textContent="Guardando..."; msg.className="mt-2 text-sm text-gray-700";
+  try {
+    const r = await fetch("/api/issue-key", { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify({ admin_password: pass, code: lastCode, university: uni, plan, issued_to_email: email }) });
+    const data = await r.json();
+    if (r.ok && data.ok) { msg.textContent="✔ Guardada en DB hasta: "+(data.expires_at||"—"); msg.className="mt-2 text-sm text-green-700"; }
+    else { msg.textContent="✖ No se pudo guardar: "+(data.error||"Error"); msg.className="mt-2 text-sm text-red-700"; }
+  } catch (e) {
+    msg.textContent="✖ Error de red."; msg.className="mt-2 text-sm text-red-700";
+  }
+});
+</script>
+</body>
+</html>

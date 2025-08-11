@@ -3,21 +3,23 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>IngresoU — Simuladores UTP/UP + IA</title>
+  <title>IngresoU — Activación de KEY</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <style> body { background: linear-gradient(to bottom, #eef2ff, #ffffff); } </style>
+  <style> body { background: #f6f7ff; } </style>
 </head>
 <body class="text-gray-900">
   <div id="root"></div>
+
   <script type="text/babel">
-    const { useState, useMemo } = React;
+    const { useState } = React;
+
     function RedeemKey(){
       const [key,setKey]=useState(""); 
       const [email,setEmail]=useState("");
-      const [status,setStatus]=useState(null); // ok | error | loading
+      const [status,setStatus]=useState(null);
       const [msg,setMsg]=useState("");
       function validateFormat(k){ return /^(UTP|UP)-[A-Z0-9]{4}-\d{4}$/.test(k.trim().toUpperCase()); }
       const onRedeem= async () => {
@@ -28,27 +30,36 @@
         try {
           const r = await fetch("/api/redeem-key", { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify({ code, email })});
           const data = await r.json();
-          if (r.ok && data.ok) { setStatus("ok"); setMsg("¡Listo! Plan activado."); }
-          else { setStatus("error"); setMsg("No se pudo activar: "+(data.error||"Error")); }
+          if (r.ok && data.ok) {
+            localStorage.setItem('ingresou_session', JSON.stringify({ code, email, at: Date.now() }));
+            setStatus("ok"); setMsg("¡Listo! Plan activado.");
+          } else {
+            setStatus("error"); setMsg("No se pudo activar: "+(data.error||"Error"));
+          }
         } catch(e){ setStatus("error"); setMsg("Error de conexión."); }
       };
-      return(<div className="rounded-2xl border p-6 bg-white/80 backdrop-blur">
+      return(<div className="rounded-2xl border p-6 bg-white">
         <h3 className="text-lg font-semibold">¿Tienes una KEY?</h3>
         <p className="text-sm text-gray-600">Activa tu acceso ingresando la KEY y tu correo.</p>
         <div className="mt-4 grid gap-3 md:grid-cols-3">
-          <input value={key} onChange={(e)=>setKey(e.target.value)} className="rounded-xl border px-4 py-2 md:col-span-1" placeholder="Ej: UTP-AB12-4578"/>
+          <input value={key} onChange={(e)=>setKey(e.target.value)} className="rounded-xl border px-4 py-2 md:col-span-1" placeholder="UTP-AB12-4578"/>
           <input value={email} onChange={(e)=>setEmail(e.target.value)} type="email" className="rounded-xl border px-4 py-2 md:col-span-1" placeholder="Tu correo"/>
-          <button onClick={onRedeem} className="rounded-xl bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700 md:col-span-1">Activar</button>
+          <button onClick={onRedeem} className="rounded-xl bg-indigo-600 px-4 py-2 text-white md:col-span-1">Activar</button>
         </div>
         {status==="loading"&&<p className="mt-3 text-sm text-gray-700">⏳ {msg}</p>}
-        {status==="ok"&&<p className="mt-3 text-sm text-green-700">✔ {msg}</p>}
+        {status==="ok"&&<div className="mt-3 text-sm text-green-700">
+          ✔ {msg} &nbsp; <a href="/premium.html" className="ml-2 inline-block rounded-lg bg-black px-3 py-1 text-white">Ir a mi cuenta</a>
+        </div>}
         {status==="error"&&<p className="mt-3 text-sm text-red-700">✖ {msg}</p>}
       </div>);
     }
-  </script>
-  <script type="text/babel">
-    // Minimal home just to mount RedeemKey for this package
-    const App = () => (<div className="min-h-screen p-8"><h1 className="text-2xl font-bold">IngresoU — Activación de KEY</h1><div className="mt-6"><RedeemKey/></div></div>);
+
+    const App = () => (
+      <div className="min-h-screen p-8">
+        <h1 className="text-2xl font-bold">IngresoU — Activación de KEY</h1>
+        <div className="mt-6"><RedeemKey/></div>
+      </div>
+    );
     const root = ReactDOM.createRoot(document.getElementById('root')); root.render(<App/>);
   </script>
 </body>
