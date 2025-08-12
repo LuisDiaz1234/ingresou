@@ -178,5 +178,160 @@ document.getElementById('loginBtn').addEventListener('click', async ()=>{
 
 boot();
 </script>
+  <script>
+/* ========= IngresoU — Aviso de Renovación (autoinstalable) =========
+   Qué hace:
+   - Calcula días restantes con base en la suscripción.
+   - Si faltan ≤ THRESHOLD_DAYS o ya expiró, muestra un banner con:
+       * Botón "Renovar por WhatsApp" (usa tu número).
+       * Botón "Copiar datos" (para Yappy/uso manual).
+   - Se inserta automático debajo de "Tu suscripción" o, si no lo encuentra,
+     al inicio del contenido principal.
+
+   Cómo probar:
+   - En Supabase, cambia expires_at de tu KEY a ayer/mañana y recarga premium.html.
+=====================================================================*/
+(function () {
+  const PHONE = '50762796078';       // WhatsApp/Yappy (sin +)
+  const THRESHOLD_DAYS = 10;         // Muestra aviso si faltan ≤ 10 días
+  const WA_BASE = `https://wa.me/${PHONE}`;
+
+  // Utilidades
+  const get = (k) => localStorage.getItem(k) || '';
+  const KEY   = get('ingresou_key')   || get('KEY');
+  const EMAIL = get('ingresou_email') || get('EMAIL');
+
+  const fmt = (dateStr) => {
+    const d = new Date(dateStr);
+    if (isNaN(d)) return '';
+    return d.toLocaleDateString('es-PA', { day:'2-digit', month:'2-digit', year:'numeric' });
+  };
+  const daysLeft = (dateStr) => {
+    const now = new Date(), d = new Date(dateStr);
+    return Math.ceil((d - now) / (1000*60*60*24));
+  };
+
+  // Encuentra un buen lugar para insertar el banner (debajo de "Tu suscripción")
+  function findMountPoint() {
+    // 1) Tarjeta que contenga "Tu suscripción"
+    const byText = Array.from(document.querySelectorAll('h1,h2,h3,div,section'))
+      .find(el => /tu suscripci[oó]n/i.test(el.textContent || ''));
+    if (byText && byText.parentElement) return byText.parentElement;
+
+    // 2) Un contenedor de página común (si usas tailwind: max-w-*)
+    const main = document.querySelector('[class*="max-w-"], main, .container');
+    if (main) return main;
+
+    // 3) Como último recurso, el body
+    return document.body;
+  }
+
+  // Intenta leer fecha de la UI si la API no responde
+  function tryReadExpiresFromDOM() {
+    // Busca "Vence <fecha>" en cualquier nodo
+    const node = Array.from(document.querySelectorAll('div,span,p'))
+      .find(el => /vence/i.test(el.textContent || ''));
+    if (!node) return '';
+    const m = (node.textContent || '').match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
+    if (!m) return '';
+    const [, dd, mm, yyyy] = m;
+    return `${yyyy}-${mm.padStart(2,'0')}-${dd.padStart(2,'0')}T00:00:00`;
+  }
+
+  // Crea e inserta el banner
+  function renderBanner({ university, plan, expires_at }) {
+    if (!expires_at) return;
+    const d = daysLeft(expires_at);
+    if (isNaN(d) || d > THRESHOLD_DAYS) return;   // aún falta mucho → no mostrar
+
+    const expired = d <= 0;
+    const colorBox = expired ? 'bg-red-50 border-red-200' : 'bg-yellow-50 border-yellow-200';
+    const chipBG   = expired ? 'bg-red-100' : 'bg-yellow-100';
+    const chipText = expired ? 'text-red-700' : 'text-yellow-700';
+    const title    = expired
+      ? `Tu plan expiró el ${fmt(expires_at)} (hace ${Math.abs(d)} día${Math.abs(d)===1?'':'s'}).`
+      : `Tu plan vence el ${fmt(expires_at)} (en ${d} día${d===1?'':'s'}).`;
+
+    const msg = encodeURIComponent(
+      `Hola! Quiero ${expired ? 'renovar' : 'renovar antes del vencimiento'} mi plan de IngresoU.` +
+      `\nUniversidad: ${university || 'UTP/UP'}` +
+      `\nPlan: ${plan || 'Pro 60d — $29'}` +
+      `\nKEY: ${KEY || '-'}` +
+      `\nEmail: ${EMAIL || '-'}` +
+      `\nVence: ${fmt(expires_at)}`
+    );
+    const waLink = `${WA_BASE}?text=${msg}`;
+
+    const mount = findMountPoint();
+    const banner = document.createElement('div');
+    banner.className = `mt-4 rounded-xl border p-4 ${colorBox}`;
+    banner.innerHTML = `
+      <div class="flex items-start gap-4">
+        <div class="shrink-0 rounded-full ${chipBG} px-2 py-1 text-xs ${chipText}">Aviso</div>
+        <div class="flex-1">
+          <div class="font-semibold ${expired ? 'text-red-700' : 'text-yellow-700'}">${title}</div>
+          <p class="mt-1 text-sm text-gray-700">Renueva ahora para no perder acceso a simuladores, exámenes y rankings.</p>
+          <div class="mt-3 flex flex-wrap gap-2">
+            <a href="${waLink}" target="_blank"
+               class="inline-flex items-center rounded-lg bg-green-600 px-3 py-1.5 text-white text-sm hover:opacity-90">
+               Renovar por WhatsApp
+            </a>
+            <button id="copy-renew-info"
+               class="inline-flex items-center rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50">
+               Copiar datos
+            </button>
+          </div>
+          <p class="mt-2 text-xs text-gray-500">Tel: +507 ${PHONE}</p>
+        </div>
+      </div>
+    `;
+    // Inserta debajo del bloque detectado
+    mount.parentElement ? mount.parentElement.insertBefore(banner, mount.nextSibling) : mount.prepend(banner);
+
+    // Copiar al portapapeles
+    banner.querySelector('#copy-renew-info')?.addEventListener('click', () => {
+      const text =
+`Renovación IngresoU
+Universidad: ${university || ''}
+Plan: ${plan || ''}
+KEY: ${KEY || ''}
+Email: ${EMAIL || ''}
+Vence: ${fmt(expires_at)} (${expired ? 'expirado' : d + ' días restantes'})`;
+      navigator.clipboard.writeText(text);
+    });
+  }
+
+  // Carga datos (API si puede, si no, DOM/localStorage)
+  async function init() {
+    let sub = null;
+    try {
+      if (KEY && EMAIL) {
+        const r = await fetch('/api/get-subscription', {
+          method: 'POST',
+          headers: { 'Content-Type':'application/json' },
+          body: JSON.stringify({ code: KEY, email: EMAIL })
+        });
+        const data = await r.json();
+        sub = data?.subscription || data || null;
+      }
+    } catch (e) { /* ignorar, seguimos con fallback */ }
+
+    const university = sub?.university || get('ingresou_university') || '';
+    const plan       = sub?.plan       || get('ingresou_plan')       || '';
+    let   expires_at = sub?.expires_at || sub?.expiresAt || '';
+
+    if (!expires_at) {
+      expires_at = tryReadExpiresFromDOM(); // último recurso: leer "Vence dd/mm/yyyy"
+    }
+
+    if (expires_at) {
+      renderBanner({ university, plan, expires_at });
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', init);
+})();
+</script>
+
 </body>
 </html>
