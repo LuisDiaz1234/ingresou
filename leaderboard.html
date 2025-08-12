@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>IngresoU — Ranking</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style> body { background: #f6f7ff; } </style>
+</head>
+<body class="text-gray-900">
+  <div class="mx-auto max-w-4xl p-6">
+    <header class="flex items-center justify-between">
+      <h1 class="text-2xl font-bold">Ranking — IngresoU</h1>
+      <a href="/premium.html" class="rounded-xl border px-3 py-1 text-sm">Mi cuenta</a>
+    </header>
+
+    <div class="mt-4 rounded-2xl bg-white p-4 ring-1 ring-gray-200">
+      <div class="flex flex-wrap items-center gap-2">
+        <button data-m="Álgebra Básica" class="tab rounded-xl px-3 py-1 bg-indigo-600 text-white">Álgebra Básica</button>
+        <button data-m="Razonamiento Lógico" class="tab rounded-xl px-3 py-1">Razonamiento Lógico</button>
+        <button data-m="Comprensión Lectora" class="tab rounded-xl px-3 py-1">Comprensión Lectora</button>
+        <span class="ml-auto text-sm text-gray-600">Mostrando Top <select id="limit" class="border rounded px-2 py-1 text-sm"><option>10</option><option selected>50</option><option>100</option></select></span>
+      </div>
+      <div id="status" class="mt-3 text-sm text-gray-600">Cargando…</div>
+      <div id="list" class="mt-2"></div>
+    </div>
+  </div>
+
+<script>
+const tabs = document.querySelectorAll('.tab');
+const list = document.getElementById('list');
+const status = document.getElementById('status');
+const limitSel = document.getElementById('limit');
+let current = 'Álgebra Básica';
+
+tabs.forEach(b=> b.addEventListener('click', ()=>{ tabs.forEach(x=>x.className='tab rounded-xl px-3 py-1'); b.className='tab rounded-xl px-3 py-1 bg-indigo-600 text-white'; current = b.dataset.m; load(); }));
+limitSel.addEventListener('change', load);
+
+async function load(){
+  status.textContent='Cargando…'; list.innerHTML='';
+  try{
+    const r = await fetch('/api/leaderboard?module='+encodeURIComponent(current)+'&limit='+limitSel.value);
+    const j = await r.json();
+    if(!j.ok){ status.textContent='No se pudo cargar.'; return; }
+    status.textContent = 'Top '+ (j.top?.length || 0) +' — ' + current;
+    const rows = (j.top || []).map((r,idx)=>{
+      const mm = Math.floor(r.ms/60000), ss = String(Math.floor(r.ms/1000)%60).padStart(2,'0');
+      const d = new Date(r.at).toLocaleDateString();
+      return `<div class="grid grid-cols-12 gap-2 border-b py-2 text-sm">
+        <div class="col-span-1 font-semibold">#${idx+1}</div>
+        <div class="col-span-5">${r.email}</div>
+        <div class="col-span-3">${r.score}/${r.total}</div>
+        <div class="col-span-2">${mm}:${ss}</div>
+        <div class="col-span-1 text-right">${d}</div>
+      </div>`;
+    }).join('');
+    list.innerHTML = `<div class="grid grid-cols-12 gap-2 border-b py-2 text-xs text-gray-600">
+        <div class="col-span-1">Pos</div>
+        <div class="col-span-5">Estudiante</div>
+        <div class="col-span-3">Puntaje</div>
+        <div class="col-span-2">Tiempo</div>
+        <div class="col-span-1 text-right">Fecha</div>
+      </div>` + rows;
+  }catch(e){
+    status.textContent='Error de red';
+  }
+}
+load();
+</script>
+</body>
+</html>
