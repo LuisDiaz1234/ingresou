@@ -24,9 +24,7 @@
 <script>
 const MODULE_NAME = "Comprensión Lectora";
 const TOTAL_SECONDS = 12*60;
-// The questions variable will be injected per file.
-</script>
-<script>const QUESTIONS = [
+const QUESTIONS = [
   {
     "q": "Lee: 'Los manglares protegen la costa al reducir la energía de las olas y albergan gran biodiversidad.' ¿Cuál es la idea principal?",
     "options": [
@@ -137,30 +135,23 @@ const TOTAL_SECONDS = 12*60;
     "a": 1,
     "exp": "Más radiación UV."
   }
-]; startQuiz(QUESTIONS);</script>
-<script>
+];
+
 function getSession(){ try { return JSON.parse(localStorage.getItem('ingresou_session')||'null'); } catch { return null; } }
-function saveResult(moduleName, score, total, ms){
-  try{ const key='ingresou_results'; const list=JSON.parse(localStorage.getItem(key)||'[]'); list.unshift({module:moduleName,score,total,ms,ts:Date.now()}); while(list.length>50) list.pop(); localStorage.setItem(key, JSON.stringify(list)); }catch(e){}
-}
+function saveResult(moduleName, score, total, ms){ try{ const key='ingresou_results'; const list=JSON.parse(localStorage.getItem(key)||'[]'); list.unshift({module:moduleName,score,total,ms,ts:Date.now()}); while(list.length>50) list.pop(); localStorage.setItem(key, JSON.stringify(list)); }catch(e){} }
 function fmtMs(ms){ const s=Math.max(0,Math.round(ms/1000)); const m=Math.floor(s/60), r=s%60; return String(m).padStart(2,'0')+':'+String(r).padStart(2,'0'); }
 
-async function submitGlobal(code,email,score,total,ms){
-  try {
-    const r = await fetch('/api/submit-score', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ code, email, module: MODULE_NAME, score, total, ms }) });
-    const data = await r.json(); return data;
-  } catch(e) { return { ok:false }; }
-}
+async function submitGlobal(code,email,score,total,ms){ try { const r=await fetch('/api/submit-score', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ code, email, module: MODULE_NAME, score, total, ms }) }); return await r.json(); } catch(e) { return { ok:false }; } }
 async function fetchTop(){ try{ const r=await fetch('/api/top-scores?module='+encodeURIComponent(MODULE_NAME)); const j=await r.json(); return j && j.ok ? j.top : []; }catch(e){ return []; } }
 
-function startQuiz(QUESTIONS){
+function startQuiz(){
   const s = getSession(); if(!s) { location.href='/premium.html'; return; }
   let i = 0; const answers = new Array(QUESTIONS.length).fill(null); let finished=false; let remaining=TOTAL_SECONDS;
   const root=document.getElementById('app'); const pbar=document.getElementById('pbar'); const timer=document.getElementById('timer');
   timer.textContent=fmtMs(remaining);
   const tHandle=setInterval(()=>{ if(finished) return; remaining--; if(remaining<=0){remaining=0; finished=true; render();} timer.textContent=fmtMs(remaining); },1000);
 
-  function render(){
+  async function render(){
     root.innerHTML=''; pbar.style.width=Math.round((i/QUESTIONS.length)*100)+'%';
     if(!finished){
       const q=QUESTIONS[i]; const wrap=document.createElement('div'); wrap.innerHTML=`
@@ -203,11 +194,12 @@ function startQuiz(QUESTIONS){
         </div>
         <div class="mt-4">${review}</div>`;
       root.appendChild(wrap);
-      document.getElementById('retry').onclick=()=>{ i=0; for(let k=0;k<answers.length;k++) answers[k]=null; finished=false; remaining=TOTAL_SECONDS; startQuiz(QUESTIONS); };
+      document.getElementById('retry').onclick=()=>{ i=0; for(let k=0;k<answers.length;k++) answers[k]=null; finished=false; remaining=TOTAL_SECONDS; startQuiz(); };
     }
   }
   render();
 }
+startQuiz();
 </script>
 </body>
 </html>
