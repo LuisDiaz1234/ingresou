@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>IngresoU — Razonamiento Lógico — 10 preguntas</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style> body{{background:#f6f7ff}} </style>
+</head>
+<body class="text-gray-900">
+  <div class="mx-auto max-w-3xl p-6">
+    <header class="flex items-center justify-between">
+      <h1 class="text-xl font-bold">Razonamiento Lógico — 10 preguntas</h1>
+      <a href="/premium.html" class="rounded-xl border px-3 py-1 text-sm">Volver</a>
+    </header>
+
+    <div id="app" class="mt-4 rounded-2xl bg-white p-5 ring-1 ring-gray-200 shadow"></div>
+  </div>
+
+
+<script>
+async function ensureSession(){
+  const s = JSON.parse(localStorage.getItem('ingresou_session')||'null');
+  if(!s){ location.href = '/premium.html'; return null; }
+  try{
+    const r = await fetch('/api/get-subscription', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ code: s.code, email: s.email })});
+    const data = await r.json();
+    if(!(r.ok && data.ok)){ location.href = '/premium.html'; return null; }
+    return {session:s, sub:data};
+  }catch(e){ location.href = '/premium.html'; return null; }
+}
+</script>
+
+
+<script>
+function saveResult(moduleName, score, total){
+  try{
+    const key = 'ingresou_results';
+    const list = JSON.parse(localStorage.getItem(key) || '[]');
+    list.unshift({ module: moduleName, score, total, ts: Date.now() });
+    while(list.length>50) list.pop();
+    localStorage.setItem(key, JSON.stringify(list));
+  }catch(e){}
+}
+</script>
+
+<script>
+const QUESTIONS = [
+  {
+    "q": "Completa la serie: 3, 6, 12, 24, __",
+    "options": [
+      "36",
+      "44",
+      "48",
+      "60"
+    ],
+    "a": 2,
+    "exp": "Se duplica: ×2 ⇒ 48."
+  },
+  {
+    "q": "¿Cuál no pertenece? {cuadrado, triángulo, círculo, cubo}",
+    "options": [
+      "cuadrado",
+      "triángulo",
+      "círculo",
+      "cubo"
+    ],
+    "a": 3,
+    "exp": "Cubo es 3D; los demás son figuras planas."
+  },
+  {
+    "q": "Si todos los A son B y todos los B son C, entonces:",
+    "options": [
+      "Todos los C son A",
+      "Todos los A son C",
+      "Algunos C no son A",
+      "Ninguna"
+    ],
+    "a": 1,
+    "exp": "Transitividad: A⊂B y B⊂C ⇒ A⊂C."
+  },
+  {
+    "q": "Analogía: Pez es a agua como ave es a __",
+    "options": [
+      "aire",
+      "tierra",
+      "nido",
+      "vuelo"
+    ],
+    "a": 0,
+    "exp": "Medio natural: pez-agua; ave-aire."
+  },
+  {
+    "q": "Serie: 2, 5, 9, 14, 20, __",
+    "options": [
+      "25",
+      "26",
+      "27",
+      "28"
+    ],
+    "a": 2,
+    "exp": "Diferencias +3, +4, +5, +6 ⇒ siguiente +7 ⇒ 27."
+  },
+  {
+    "q": "Ordena por tamaño: litro, mililitro, centilitro",
+    "options": [
+      "ml < cl < l",
+      "cl < ml < l",
+      "l < cl < ml",
+      "l < ml < cl"
+    ],
+    "a": 0,
+    "exp": "1 l = 100 cl = 1000 ml ⇒ ml < cl < l."
+  },
+  {
+    "q": "Si hoy es lunes, en 10 días será:",
+    "options": [
+      "jueves",
+      "viernes",
+      "sábado",
+      "domingo"
+    ],
+    "a": 0,
+    "exp": "10 mod 7 = 3 ⇒ lunes + 3 = jueves."
+  },
+  {
+    "q": "Completa: A, C, F, J, O, __",
+    "options": [
+      "U",
+      "T",
+      "S",
+      "V"
+    ],
+    "a": 0,
+    "exp": "Saltos +2,+3,+4,+5,+6 ⇒ 21 = U."
+  },
+  {
+    "q": "Si 5 trabajadores hacen una obra en 12 días, 10 trabajadores (misma eficiencia) la harán en:",
+    "options": [
+      "6 días",
+      "12 días",
+      "24 días",
+      "3 días"
+    ],
+    "a": 0,
+    "exp": "Doble personal ⇒ mitad de tiempo."
+  },
+  {
+    "q": "¿Qué número sigue? 1, 1, 2, 3, 5, 8, __",
+    "options": [
+      "13",
+      "10",
+      "12",
+      "14"
+    ],
+    "a": 0,
+    "exp": "Fibonacci: suma de los dos anteriores ⇒ 13."
+  }
+];
+
+function startQuiz(){
+  let i = 0;
+  const answers = new Array(QUESTIONS.length).fill(null);
+  let finished = false;
+
+  const root = document.getElementById('app');
+
+  function render(){
+    root.innerHTML = '';
+    if(!finished){
+      const q = QUESTIONS[i];
+      const wrap = document.createElement('div');
+      wrap.innerHTML = `
+        <div class="text-sm text-gray-600">Pregunta ${i+1} de ${QUESTIONS.length}</div>
+        <div class="mt-2 text-lg font-medium">${q.q}</div>
+        <div class="mt-4 space-y-2"></div>
+        <div class="mt-4 flex justify-between">
+          <button id="prevBtn" class="rounded-xl border px-4 py-2">Anterior</button>
+          <button id="nextBtn" class="rounded-xl bg-indigo-600 px-4 py-2 text-white">${i<QUESTIONS.length-1?'Siguiente':'Finalizar'}</button>
+        </div>
+      `;
+      const list = wrap.children[2];
+      q.options.forEach((opt,idx)=>{
+        const btn = document.createElement('button');
+        btn.className = "w-full rounded-xl border px-4 py-2 text-left hover:bg-gray-50 " + (answers[i]===idx?"ring-2 ring-indigo-500":"");
+        btn.innerHTML = `<span class="mr-2">${String.fromCharCode(65+idx)}.</span> ${opt}`;
+        btn.onclick = ()=>{ answers[i]=idx; render(); };
+        list.appendChild(btn);
+      });
+      root.appendChild(wrap);
+      document.getElementById('prevBtn').onclick = ()=>{ if(i>0){ i--; render(); } };
+      document.getElementById('nextBtn').onclick = ()=>{ if(i<QUESTIONS.length-1){ i++; render(); } else { finished=true; render(); } };
+    }else{
+      // results
+      let correct = 0;
+      let review = '';
+      QUESTIONS.forEach((q,idx)=>{
+        const ok = answers[idx]===q.a;
+        if(ok) correct++;
+        const chosen = answers[idx]==null? '—' : q.options[answers[idx]];
+        review += `
+          <div class="rounded-xl border p-3 mt-3">
+            <div class="text-sm ${ok?'text-green-700':'text-red-700'}">${ok?'✔ Correcto':'✖ Incorrecto'}</div>
+            <div class="mt-1 font-medium">${q.q}</div>
+            <div class="mt-1 text-sm"><b>Tu respuesta:</b> ${chosen}</div>
+            <div class="mt-1 text-sm"><b>Correcta:</b> ${q.options[q.a]}</div>
+            <div class="mt-1 text-sm text-gray-700">${q.exp}</div>
+          </div>
+        `;
+      });
+      const wrap = document.createElement('div');
+      wrap.innerHTML = `
+        <div class="text-lg font-semibold">Resultado: ${correct} / ${QUESTIONS.length}</div>
+        <div class="text-sm text-gray-600">Fecha: ${new Date().toLocaleString()}</div>
+        <div class="mt-3">
+          <a href="/premium.html" class="rounded-xl bg-black px-4 py-2 text-white">Volver a Mi cuenta</a>
+          <button id="retry" class="ml-2 rounded-xl border px-4 py-2">Reintentar</button>
+        </div>
+        <div class="mt-4">${review}</div>
+      `;
+      root.appendChild(wrap);
+      document.getElementById('retry').onclick = ()=>{ i=0; for(let k=0;k<answers.length;k++) answers[k]=null; finished=false; render(); };
+      saveResult("Razonamiento Lógico", correct, QUESTIONS.length);
+    }
+  }
+  render();
+}
+
+ensureSession().then(s=>{ if(s) startQuiz(); });
+</script>
+</body>
+</html>

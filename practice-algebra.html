@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>IngresoU — Álgebra Básica — 10 preguntas</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style> body{{background:#f6f7ff}} </style>
+</head>
+<body class="text-gray-900">
+  <div class="mx-auto max-w-3xl p-6">
+    <header class="flex items-center justify-between">
+      <h1 class="text-xl font-bold">Álgebra Básica — 10 preguntas</h1>
+      <a href="/premium.html" class="rounded-xl border px-3 py-1 text-sm">Volver</a>
+    </header>
+
+    <div id="app" class="mt-4 rounded-2xl bg-white p-5 ring-1 ring-gray-200 shadow"></div>
+  </div>
+
+
+<script>
+async function ensureSession(){
+  const s = JSON.parse(localStorage.getItem('ingresou_session')||'null');
+  if(!s){ location.href = '/premium.html'; return null; }
+  try{
+    const r = await fetch('/api/get-subscription', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ code: s.code, email: s.email })});
+    const data = await r.json();
+    if(!(r.ok && data.ok)){ location.href = '/premium.html'; return null; }
+    return {session:s, sub:data};
+  }catch(e){ location.href = '/premium.html'; return null; }
+}
+</script>
+
+
+<script>
+function saveResult(moduleName, score, total){
+  try{
+    const key = 'ingresou_results';
+    const list = JSON.parse(localStorage.getItem(key) || '[]');
+    list.unshift({ module: moduleName, score, total, ts: Date.now() });
+    while(list.length>50) list.pop();
+    localStorage.setItem(key, JSON.stringify(list));
+  }catch(e){}
+}
+</script>
+
+<script>
+const QUESTIONS = [
+  {
+    "q": "Resuelve: 3x + 5 = 20. ¿x = ?",
+    "options": [
+      "5",
+      "3",
+      "-5",
+      "15"
+    ],
+    "a": 0,
+    "exp": "3x = 15 ⇒ x = 5."
+  },
+  {
+    "q": "Factoriza: x^2 - 9",
+    "options": [
+      "(x-9)(x+1)",
+      "(x-3)(x+3)",
+      "(x-9)^2",
+      "x(x-9)"
+    ],
+    "a": 1,
+    "exp": "Diferencia de cuadrados: a^2 - b^2 = (a-b)(a+b)."
+  },
+  {
+    "q": "Si 5 cuadernos cuestan $15, ¿cuánto cuestan 8 cuadernos?",
+    "options": [
+      "$20",
+      "$22",
+      "$24",
+      "$28"
+    ],
+    "a": 2,
+    "exp": "Precio unitario 15/5=3 ⇒ 8×3=24."
+  },
+  {
+    "q": "Simplifica: 2(x - 4) + 3(x + 1)",
+    "options": [
+      "5x - 5",
+      "5x - 7",
+      "5x - 11",
+      "x - 5"
+    ],
+    "a": 0,
+    "exp": "2x-8 + 3x+3 = 5x - 5."
+  },
+  {
+    "q": "x^0 = ?",
+    "options": [
+      "x",
+      "0",
+      "1",
+      "No existe"
+    ],
+    "a": 2,
+    "exp": "Para x≠0, x^0 = 1."
+  },
+  {
+    "q": "Si 2x - 1 = 7, entonces 4x = ?",
+    "options": [
+      "16",
+      "28",
+      "8",
+      "12"
+    ],
+    "a": 0,
+    "exp": "2x=8 ⇒ x=4 ⇒ 4x=16."
+  },
+  {
+    "q": "Resuelve: (x/3) + 2 = 6",
+    "options": [
+      "12",
+      "18",
+      "9",
+      "6"
+    ],
+    "a": 0,
+    "exp": "x/3=4 ⇒ x=12."
+  },
+  {
+    "q": "El perímetro de un rectángulo 5x por 3x es:",
+    "options": [
+      "8x^2",
+      "15x^2",
+      "16x",
+      "10x"
+    ],
+    "a": 2,
+    "exp": "Perímetro = 2(5x+3x) = 16x."
+  },
+  {
+    "q": "Si a:b = 2:3 y b=9, entonces a = ?",
+    "options": [
+      "6",
+      "12",
+      "3",
+      "18"
+    ],
+    "a": 0,
+    "exp": "a = (2/3)·9 = 6."
+  },
+  {
+    "q": "Soluciona: 4(x-2)=3x+5",
+    "options": [
+      "x=13",
+      "x=-13",
+      "x=-5",
+      "Ninguna"
+    ],
+    "a": 0,
+    "exp": "4x-8 = 3x+5 ⇒ x = 13."
+  }
+];
+
+function startQuiz(){
+  let i = 0;
+  const answers = new Array(QUESTIONS.length).fill(null);
+  let finished = false;
+
+  const root = document.getElementById('app');
+
+  function render(){
+    root.innerHTML = '';
+    if(!finished){
+      const q = QUESTIONS[i];
+      const wrap = document.createElement('div');
+      wrap.innerHTML = `
+        <div class="text-sm text-gray-600">Pregunta ${i+1} de ${QUESTIONS.length}</div>
+        <div class="mt-2 text-lg font-medium">${q.q}</div>
+        <div class="mt-4 space-y-2"></div>
+        <div class="mt-4 flex justify-between">
+          <button id="prevBtn" class="rounded-xl border px-4 py-2">Anterior</button>
+          <button id="nextBtn" class="rounded-xl bg-indigo-600 px-4 py-2 text-white">${i<QUESTIONS.length-1?'Siguiente':'Finalizar'}</button>
+        </div>
+      `;
+      const list = wrap.children[2];
+      q.options.forEach((opt,idx)=>{
+        const btn = document.createElement('button');
+        btn.className = "w-full rounded-xl border px-4 py-2 text-left hover:bg-gray-50 " + (answers[i]===idx?"ring-2 ring-indigo-500":"");
+        btn.innerHTML = `<span class="mr-2">${String.fromCharCode(65+idx)}.</span> ${opt}`;
+        btn.onclick = ()=>{ answers[i]=idx; render(); };
+        list.appendChild(btn);
+      });
+      root.appendChild(wrap);
+      document.getElementById('prevBtn').onclick = ()=>{ if(i>0){ i--; render(); } };
+      document.getElementById('nextBtn').onclick = ()=>{ if(i<QUESTIONS.length-1){ i++; render(); } else { finished=true; render(); } };
+    }else{
+      // results
+      let correct = 0;
+      let review = '';
+      QUESTIONS.forEach((q,idx)=>{
+        const ok = answers[idx]===q.a;
+        if(ok) correct++;
+        const chosen = answers[idx]==null? '—' : q.options[answers[idx]];
+        review += `
+          <div class="rounded-xl border p-3 mt-3">
+            <div class="text-sm ${ok?'text-green-700':'text-red-700'}">${ok?'✔ Correcto':'✖ Incorrecto'}</div>
+            <div class="mt-1 font-medium">${q.q}</div>
+            <div class="mt-1 text-sm"><b>Tu respuesta:</b> ${chosen}</div>
+            <div class="mt-1 text-sm"><b>Correcta:</b> ${q.options[q.a]}</div>
+            <div class="mt-1 text-sm text-gray-700">${q.exp}</div>
+          </div>
+        `;
+      });
+      const wrap = document.createElement('div');
+      wrap.innerHTML = `
+        <div class="text-lg font-semibold">Resultado: ${correct} / ${QUESTIONS.length}</div>
+        <div class="text-sm text-gray-600">Fecha: ${new Date().toLocaleString()}</div>
+        <div class="mt-3">
+          <a href="/premium.html" class="rounded-xl bg-black px-4 py-2 text-white">Volver a Mi cuenta</a>
+          <button id="retry" class="ml-2 rounded-xl border px-4 py-2">Reintentar</button>
+        </div>
+        <div class="mt-4">${review}</div>
+      `;
+      root.appendChild(wrap);
+      document.getElementById('retry').onclick = ()=>{ i=0; for(let k=0;k<answers.length;k++) answers[k]=null; finished=false; render(); };
+      saveResult("Álgebra Básica", correct, QUESTIONS.length);
+    }
+  }
+  render();
+}
+
+ensureSession().then(s=>{ if(s) startQuiz(); });
+</script>
+</body>
+</html>
