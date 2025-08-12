@@ -11,7 +11,11 @@
   <div class="mx-auto max-w-3xl p-6">
     <header class="flex items-center justify-between">
       <h1 class="text-xl font-bold">Razonamiento Lógico — 10 preguntas</h1>
-      <a href="/premium.html" class="rounded-xl border px-3 py-1 text-sm">Volver</a>
+      <div class="flex items-center gap-3">
+        <div class="w-40 h-2 rounded bg-gray-200 overflow-hidden"><div id="pbar" class="h-2 bg-indigo-600" style="width:0%"></div></div>
+        <div id="timer" class="rounded-xl bg-black px-3 py-1 text-white text-sm">--:--</div>
+        <a href="/premium.html" class="rounded-xl border px-3 py-1 text-sm">Salir</a>
+      </div>
     </header>
 
     <div id="app" class="mt-4 rounded-2xl bg-white p-5 ring-1 ring-gray-200 shadow"></div>
@@ -33,14 +37,33 @@ async function ensureSession(){
 
 
 <script>
-function saveResult(moduleName, score, total){
+function saveResult(moduleName, score, total, ms){
   try{
     const key = 'ingresou_results';
     const list = JSON.parse(localStorage.getItem(key) || '[]');
-    list.unshift({ module: moduleName, score, total, ts: Date.now() });
+    list.unshift({ module: moduleName, score, total, ms, ts: Date.now() });
     while(list.length>50) list.pop();
     localStorage.setItem(key, JSON.stringify(list));
   }catch(e){}
+}
+
+function slug(s){ return String(s).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,''); }
+function saveRanking(moduleName, score, total, ms){
+  try{
+    const key = 'ingresou_ranking_' + slug(moduleName);
+    const arr = JSON.parse(localStorage.getItem(key) || '[]');
+    arr.push({ score, total, ms, ts: Date.now() });
+    // sort: higher score first, then less time
+    arr.sort((a,b)=> (b.score - a.score) || (a.ms - b.ms) || (a.ts - b.ts) );
+    if(arr.length>20) arr.length = 20;
+    localStorage.setItem(key, JSON.stringify(arr));
+    return arr.slice(0,10);
+  }catch(e){ return []; }
+}
+function fmtMs(ms){
+  const s = Math.max(0, Math.round(ms/1000));
+  const m = Math.floor(s/60), r = s%60;
+  return String(m).padStart(2,'0')+':'+String(r).padStart(2,'0');
 }
 </script>
 
@@ -88,7 +111,7 @@ const QUESTIONS = [
       "vuelo"
     ],
     "a": 0,
-    "exp": "Medio natural: pez-agua; ave-aire."
+    "exp": "Medio natural."
   },
   {
     "q": "Serie: 2, 5, 9, 14, 20, __",
@@ -99,7 +122,7 @@ const QUESTIONS = [
       "28"
     ],
     "a": 2,
-    "exp": "Diferencias +3, +4, +5, +6 ⇒ siguiente +7 ⇒ 27."
+    "exp": "Diferencias +3,+4,+5,+6 ⇒ +7 ⇒ 27."
   },
   {
     "q": "Ordena por tamaño: litro, mililitro, centilitro",
@@ -121,7 +144,7 @@ const QUESTIONS = [
       "domingo"
     ],
     "a": 0,
-    "exp": "10 mod 7 = 3 ⇒ lunes + 3 = jueves."
+    "exp": "10 mod 7 = 3 ⇒ lunes +3 = jueves."
   },
   {
     "q": "Completa: A, C, F, J, O, __",
@@ -132,7 +155,7 @@ const QUESTIONS = [
       "V"
     ],
     "a": 0,
-    "exp": "Saltos +2,+3,+4,+5,+6 ⇒ 21 = U."
+    "exp": "Saltos +2,+3,+4,+5,+6 ⇒ 21 (U)."
   },
   {
     "q": "Si 5 trabajadores hacen una obra en 12 días, 10 trabajadores (misma eficiencia) la harán en:",
@@ -154,19 +177,33 @@ const QUESTIONS = [
       "14"
     ],
     "a": 0,
-    "exp": "Fibonacci: suma de los dos anteriores ⇒ 13."
+    "exp": "Fibonacci ⇒ 13."
   }
 ];
+const TOTAL_SECONDS = 720;
 
 function startQuiz(){
   let i = 0;
   const answers = new Array(QUESTIONS.length).fill(null);
   let finished = false;
-
+  let startTs = Date.now();
+  let remaining = TOTAL_SECONDS;
   const root = document.getElementById('app');
+  const pbar = document.getElementById('pbar');
+  const timer = document.getElementById('timer');
+  const tHandle = setInterval(()=>{
+    if (finished) return;
+    remaining--;
+    if (remaining <= 0) { remaining = 0; finished = true; render(); }
+    const mm = String(Math.floor(remaining/60)).padStart(2,'0');
+    const ss = String(remaining%60).padStart(2,'0');
+    timer.textContent = mm+':'+ss;
+  }, 1000);
+  timer.textContent = String(Math.floor(remaining/60)).padStart(2,'0')+':'+String(remaining%60).padStart(2,'0');
 
   function render(){
     root.innerHTML = '';
+    pbar.style.width = Math.round((i/QUESTIONS.length)*100)+'%';
     if(!finished){
       const q = QUESTIONS[i];
       const wrap = document.createElement('div');
@@ -191,6 +228,9 @@ function startQuiz(){
       document.getElementById('prevBtn').onclick = ()=>{ if(i>0){ i--; render(); } };
       document.getElementById('nextBtn').onclick = ()=>{ if(i<QUESTIONS.length-1){ i++; render(); } else { finished=true; render(); } };
     }else{
+      clearInterval(tHandle);
+      pbar.style.width = '100%';
+      const elapsed = (TOTAL_SECONDS - remaining) * 1000;
       // results
       let correct = 0;
       let review = '';
@@ -208,19 +248,30 @@ function startQuiz(){
           </div>
         `;
       });
+      const top = saveRanking("Razonamiento Lógico", correct, QUESTIONS.length, elapsed);
+      saveResult("Razonamiento Lógico", correct, QUESTIONS.length, elapsed);
+      const topHtml = top.map((r,idx)=>{
+        const t = new Date(r.ts).toLocaleDateString();
+        const mm = String(Math.floor(Math.max(0, Math.round(r.ms/1000))/60)).padStart(2,'0');
+        const ss = String(Math.max(0, Math.round(r.ms/1000))%60).padStart(2,'0');
+        return `<div class="flex justify-between"><span>#${idx+1} — ${r.score}/${r.total}</span><span>${mm}:${ss} · ${t}</span></div>`;
+      }).join('');
       const wrap = document.createElement('div');
       wrap.innerHTML = `
         <div class="text-lg font-semibold">Resultado: ${correct} / ${QUESTIONS.length}</div>
-        <div class="text-sm text-gray-600">Fecha: ${new Date().toLocaleString()}</div>
+        <div class="text-sm text-gray-600">Tiempo usado: ${Math.floor(elapsed/60000)}:${String(Math.floor(elapsed/1000)%60).padStart(2,'0')}</div>
         <div class="mt-3">
           <a href="/premium.html" class="rounded-xl bg-black px-4 py-2 text-white">Volver a Mi cuenta</a>
           <button id="retry" class="ml-2 rounded-xl border px-4 py-2">Reintentar</button>
         </div>
+        <div class="mt-6 rounded-2xl bg-indigo-50 p-4">
+          <div class="text-sm font-semibold text-indigo-900">Ranking local (Top 10)</div>
+          <div class="mt-2 text-sm">${topHtml || 'Aún no hay ranking. ¡Sigue practicando!'}</div>
+        </div>
         <div class="mt-4">${review}</div>
       `;
       root.appendChild(wrap);
-      document.getElementById('retry').onclick = ()=>{ i=0; for(let k=0;k<answers.length;k++) answers[k]=null; finished=false; render(); };
-      saveResult("Razonamiento Lógico", correct, QUESTIONS.length);
+      document.getElementById('retry').onclick = ()=>{ i=0; for(let k=0;k<answers.length;k++) answers[k]=null; finished=false; remaining=TOTAL_SECONDS; startQuiz(); };
     }
   }
   render();
