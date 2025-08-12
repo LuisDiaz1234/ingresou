@@ -449,6 +449,118 @@ Vence: ${fmt(expires_at)} (${expired ? 'expirado' : d + ' días restantes'})`;
   document.addEventListener('DOMContentLoaded', bind);
 })();
 </script>
+<script>
+/* ===== IngresoU – Auto-redimir KEY en el login =====
+   - Verifica la KEY y si está NOT_REDEEMED, la activa y vuelve a verificar.
+   - Si OK, guarda datos en localStorage y entra a /premium.html.
+*/
+(function () {
+  const SELECTORS = {
+    form:   '#key-login-form, form[data-key-login], .key-login-form, form',
+    key:    '#key-input, input[name=key], input[placeholder*="UTP"], input[placeholder*="UP"], input[placeholder*="KEY"], input[type="text"]',
+    email:  '#email-input, input[type=email], input[name=email], input[placeholder*="@"]',
+    submit: '#login-btn, button[type=submit], button'
+  };
+
+  function $(sel, root=document){ for (const s of sel.split(',')) { const el = root.querySelector(s.trim()); if (el) return el; } return null; }
+  function statusHost(){
+    // Intenta escribir el mensaje dentro de la tarjeta "Inicia sesión con tu KEY"
+    const card = Array.from(document.querySelectorAll('div,section'))
+      .find(el => /inicia sesi[oó]n con tu key/i.test(el.textContent||''));
+    return card || document.body;
+  }
+  function setStatus(msg, type='info'){
+    let el = document.getElementById('key-status');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'key-status';
+      el.style.marginTop = '8px';
+      el.style.fontSize = '12px';
+      statusHost().appendChild(el);
+    }
+    const colors = {info:'#374151',ok:'#059669',warn:'#b45309',err:'#b91c1c'};
+    el.style.color = colors[type] || colors.info;
+    el.textContent = msg;
+  }
+
+  async function apiGetSub(code, email) {
+    const r = await fetch('/api/get-subscription', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ code, email })
+    });
+    return r.json();
+  }
+  async function apiRedeem(code, email) {
+    const r = await fetch('/api/redeem-key', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ code, email })
+    });
+    return r.json();
+  }
+
+  async function handleLogin(e) {
+    e?.preventDefault?.();
+    const keyEl   = $(SELECTORS.key);
+    const mailEl  = $(SELECTORS.email);
+    if (!keyEl || !mailEl) { setStatus('No encuentro los campos de KEY y correo.', 'err'); return; }
+
+    const code  = (keyEl.value || '').trim().toUpperCase();
+    const email = (mailEl.value || '').trim().toLowerCase();
+    if (!code || !email) { setStatus('Ingresa tu KEY y tu correo.', 'warn'); return; }
+
+    setStatus('Verificando acceso…');
+
+    try {
+      let res = await apiGetSub(code, email);
+      let payload = res?.subscription || res;
+
+      if (payload?.ok === false && payload?.error === 'NOT_REDEEMED') {
+        setStatus('Activando tu KEY…');
+        const r2 = await apiRedeem(code, email);
+        if (!(r2?.ok || r2?.error === 'ALREADY_REDEEMED')) {
+          setStatus('No se pudo activar: ' + (r2?.error || 'ERROR'), 'err');
+          return;
+        }
+        res = await apiGetSub(code, email);
+        payload = res?.subscription || res;
+      }
+
+      if (payload?.ok === false) {
+        const err = payload?.error || 'ERROR';
+        if (err === 'NOT_FOUND')         setStatus('La KEY no existe en DB. En admin.html pulsa "Emitir en DB".', 'err');
+        else if (err === 'EXPIRED')      setStatus('La KEY está vencida. Solicita renovación.', 'err');
+        else if (err === 'EMAIL_MISMATCH') setStatus('El correo no coincide con el de emisión. Usa el mismo correo o emite otra KEY.', 'err');
+        else setStatus('Error: ' + err, 'err');
+        return;
+      }
+
+      // Guardar y entrar
+      localStorage.setItem('ingresou_key', code);
+      localStorage.setItem('ingresou_email', email);
+      if (payload?.university) localStorage.setItem('ingresou_university', payload.university);
+      if (payload?.plan)       localStorage.setItem('ingresou_plan', payload.plan);
+      if (payload?.expires_at) localStorage.setItem('ingresou_expires_at', payload.expires_at);
+
+      setStatus('Acceso verificado. Entrando…', 'ok');
+      location.href = '/premium.html';
+    } catch (e) {
+      console.error(e);
+      setStatus('Error de red o servidor. Intenta de nuevo.', 'err');
+    }
+  }
+
+  function bind() {
+    const form  = $(SELECTORS.form);
+    const btn   = $(SELECTORS.submit);
+    if (form)  form.addEventListener('submit', handleLogin);
+    if (btn)   btn.addEventListener('click', handleLogin);
+  }
+
+  document.addEventListener('DOMContentLoaded', bind);
+})();
+</script>
 
 </body>
 </html>
