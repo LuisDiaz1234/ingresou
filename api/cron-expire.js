@@ -18,6 +18,8 @@ module.exports = async (req, res) => {
 
     // Autorización por header
     const auth = (req.headers['authorization'] || '').trim();
+    console.log('[cron-expire] hasSecret=', !!CRON_SECRET, 'authLen=', auth.length, 'authStartsWithBearer=', auth.startsWith('Bearer '));
+
     if (!CRON_SECRET || auth !== `Bearer ${CRON_SECRET}`) {
       return res.status(401).json({ ok: false, error: 'UNAUTHORIZED' });
     }
