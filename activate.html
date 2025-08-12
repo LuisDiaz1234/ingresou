@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Activando tu acceso… — IngresoU</title>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <style>body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,"Noto Sans",sans-serif;max-width:680px;margin:80px auto;padding:0 16px;color:#111} .box{border:1px solid #e5e7eb;border-radius:12px;padding:20px;background:#fff} .muted{color:#6b7280} .ok{color:#059669} .err{color:#b91c1c}</style>
+</head>
+<body>
+  <h1>Activando tu acceso…</h1>
+  <div class="box">
+    <p id="status" class="muted">Procesando…</p>
+    <p class="muted">Si no avanza en unos segundos, vuelve a intentar o contáctanos.</p>
+  </div>
+
+  <script>
+  (async function(){
+    const qs = new URLSearchParams(location.search);
+    const code  = (qs.get('code')  || '').trim().toUpperCase();
+    const email = (qs.get('email') || '').trim().toLowerCase();
+    const out = document.getElementById('status');
+
+    function setStatus(t, cls){ out.textContent = t; out.className = cls || 'muted'; }
+
+    if (!code || !email) {
+      setStatus('Falta el código o el correo en el enlace.', 'err');
+      return;
+    }
+
+    setStatus('Activando tu KEY…');
+
+    try {
+      // Redimir
+      const r1 = await fetch('/api/redeem-key', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ code, email })
+      });
+      const j1 = await r1.json();
+      if (j1?.ok !== true && j1?.error !== 'ALREADY_REDEEMED') {
+        setStatus('No se pudo activar: ' + (j1?.error || 'ERROR'), 'err');
+        return;
+      }
+
+      // Verificar y guardar
+      const r2 = await fetch('/api/get-subscription', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ code, email })
+      });
+      const sub = await r2.json();
+
+      if (sub?.ok === false) {
+        setStatus('Error: ' + (sub?.error || 'ERROR'), 'err');
+        return;
+      }
+
+      localStorage.setItem('ingresou_key', code);
+      localStorage.setItem('ingresou_email', email);
+      if (sub?.university) localStorage.setItem('ingresou_university', sub.university);
+      if (sub?.plan)       localStorage.setItem('ingresou_plan', sub.plan);
+      if (sub?.expires_at) localStorage.setItem('ingresou_expires_at', sub.expires_at);
+
+      setStatus('¡Listo! Acceso verificado. Entrando…', 'ok');
+      setTimeout(()=> location.href = '/premium.html', 800);
+    } catch(e) {
+      console.error(e);
+      setStatus('Error de red o servidor. Intenta de nuevo.', 'err');
+    }
+  })();
+  </script>
+</body>
+</html>
