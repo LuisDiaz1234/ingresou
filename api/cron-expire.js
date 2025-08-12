@@ -16,13 +16,16 @@ module.exports = async (req, res) => {
       return res.status(405).json({ ok: false, error: 'METHOD_NOT_ALLOWED' });
     }
 
-    // Autorización por header
-    const auth = (req.headers['authorization'] || '').trim();
-    console.log('[cron-expire] hasSecret=', !!CRON_SECRET, 'authLen=', auth.length, 'authStartsWithBearer=', auth.startsWith('Bearer '));
+   // Autorización: acepta el Bearer <CRON_SECRET> o una invocación del cron de Vercel
+const auth = (req.headers['authorization'] || '').trim();
+const fromCron = !!req.headers['x-vercel-cron']; // Vercel añade este header
+const authorized =
+  fromCron || (CRON_SECRET && auth === `Bearer ${CRON_SECRET}`);
 
-    if (!CRON_SECRET || auth !== `Bearer ${CRON_SECRET}`) {
-      return res.status(401).json({ ok: false, error: 'UNAUTHORIZED' });
-    }
+if (!authorized) {
+  return res.status(401).json({ ok: false, error: 'UNAUTHORIZED' });
+}
+
 
     const nowIso = new Date().toISOString();
 
