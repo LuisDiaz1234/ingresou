@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>IngresoU — Prepárate y entra a la U</title>
+  <meta name="description" content="Simuladores reales para UTP y UP. Prácticas, ranking global y plan de estudio. Compra con Yappy.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body{ font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, 'Noto Sans'; background:#f6f7ff }
+    .glass{ background:rgba(255,255,255,.8); backdrop-filter:saturate(180%) blur(8px); }
+  </style>
+</head>
+<body class="text-gray-900">
+  <header class="mx-auto max-w-6xl p-4 flex items-center justify-between">
+    <div class="text-xl font-bold">Ingreso<span class="text-indigo-600">U</span></div>
+    <nav class="flex items-center gap-2">
+      <a href="/leaderboard.html" class="rounded-xl border px-3 py-1 text-sm">Ranking</a>
+      <a href="/premium.html" class="rounded-xl border px-3 py-1 text-sm">Mi cuenta</a>
+    </nav>
+  </header>
+
+  <section class="mx-auto max-w-6xl p-6 pt-4 grid lg:grid-cols-2 gap-8 items-center">
+    <div>
+      <h1 class="text-3xl lg:text-5xl font-extrabold leading-tight">Simuladores reales para UTP y UP</h1>
+      <p class="mt-3 text-gray-700 text-lg">Practica con preguntas tipo examen, ranking global y recomendaciones. ¡Todo en un solo lugar!</p>
+      <div class="mt-5 flex flex-wrap gap-3">
+        <a href="#planes" class="rounded-2xl bg-indigo-600 px-5 py-3 text-white font-semibold">Ver planes</a>
+        <a href="#comprar" class="rounded-2xl bg-black px-5 py-3 text-white font-semibold">Comprar con Yappy</a>
+      </div>
+      <div class="mt-4 text-sm text-gray-600">Pago seguro con Yappy · Acceso por KEY · Soporte por WhatsApp</div>
+    </div>
+    <div class="glass rounded-3xl p-6 ring-1 ring-gray-200 shadow">
+      <div class="text-sm text-indigo-800 font-semibold">¿Qué incluye?</div>
+      <ul class="mt-2 space-y-2 text-gray-800">
+        <li>• Módulos Premium: Álgebra, Razonamiento Lógico, Comprensión Lectora</li>
+        <li>• Simulaciones cronometradas con revisión paso a paso</li>
+        <li>• Ranking global y mejores marcas por módulo</li>
+        <li>• Acceso desde cualquier dispositivo</li>
+      </ul>
+      <div class="mt-4 rounded-xl bg-indigo-50 p-3 text-sm text-indigo-900">
+        <b>Tip:</b> Instala la app en tu teléfono desde el navegador para tenerla a un toque.
+      </div>
+    </div>
+  </section>
+
+  <section id="planes" class="mx-auto max-w-6xl p-6">
+    <h2 class="text-2xl font-bold">Planes</h2>
+    <div class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div class="rounded-2xl bg-white ring-1 ring-gray-200 p-6 shadow">
+        <div class="text-sm text-gray-600">Básico</div>
+        <div class="mt-1 text-2xl font-bold">$14</div>
+        <div class="text-sm text-gray-500">30 días</div>
+        <ul class="mt-3 text-sm text-gray-700 space-y-1">
+          <li>• 3 módulos Premium</li>
+          <li>• Ranking global</li>
+        </ul>
+        <button data-plan="Basic 30d — $14" class="buyBtn mt-4 w-full rounded-xl bg-black px-4 py-2 text-white">Comprar con Yappy</button>
+      </div>
+      <div class="rounded-2xl bg-white ring-2 ring-indigo-600 p-6 shadow">
+        <div class="text-sm text-indigo-700">Pro</div>
+        <div class="mt-1 text-2xl font-bold">$29</div>
+        <div class="text-sm text-gray-500">60 días</div>
+        <ul class="mt-3 text-sm text-gray-700 space-y-1">
+          <li>• Todo lo del Básico</li>
+          <li>• Soporte prioritario</li>
+          <li>• Próximos módulos incluidos</li>
+        </ul>
+        <button data-plan="Pro 60d — $29" class="buyBtn mt-4 w-full rounded-xl bg-indigo-600 px-4 py-2 text-white">Comprar con Yappy</button>
+      </div>
+      <div class="rounded-2xl bg-white ring-1 ring-gray-200 p-6 shadow">
+        <div class="text-sm text-gray-600">Lite</div>
+        <div class="mt-1 text-2xl font-bold">$9</div>
+        <div class="text-sm text-gray-500">15 días</div>
+        <ul class="mt-3 text-sm text-gray-700 space-y-1">
+          <li>• 3 módulos Premium</li>
+          <li>• Soporte básico</li>
+        </ul>
+        <button data-plan="Lite 15d — $9" class="buyBtn mt-4 w-full rounded-xl bg-black px-4 py-2 text-white">Comprar con Yappy</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="comprar" class="mx-auto max-w-6xl p-6">
+    <h2 class="text-2xl font-bold">Comprar con Yappy</h2>
+    <div class="mt-3 grid gap-4 lg:grid-cols-2">
+      <div class="rounded-2xl bg-white ring-1 ring-gray-200 p-6 shadow">
+        <div class="text-sm text-gray-600">Paso 1</div>
+        <div class="font-semibold mt-1">Paga al Yappy <span class="text-indigo-600">+507 6279-6078</span></div>
+        <div class="text-sm text-gray-600">Referencia: tu correo + plan (ej: miemail@gmail.com — Pro 60d)</div>
+        <div class="text-sm text-gray-600 mt-2">También puedes escribirnos por WhatsApp y te guiamos.</div>
+        <div class="mt-4 flex gap-2">
+          <a id="whatsLink" target="_blank" class="rounded-xl bg-green-600 px-4 py-2 text-white">Abrir WhatsApp</a>
+          <a href="/premium.html" class="rounded-xl border px-4 py-2">Ya tengo KEY</a>
+        </div>
+      </div>
+      <div class="rounded-2xl bg-white ring-1 ring-gray-200 p-6 shadow">
+        <div class="text-sm text-gray-600">Paso 2</div>
+        <div class="font-semibold mt-1">Recibe tu KEY por correo</div>
+        <p class="text-sm text-gray-600">Después del pago, te enviamos una KEY para activar tu plan. Entra a <b>Mi cuenta</b> y actívala.</p>
+        <div class="mt-4 rounded-xl bg-indigo-50 p-3 text-sm text-indigo-900">
+          Si tienes dudas, escribe por WhatsApp. Tiempo medio de entrega: 5–10 min (horario laboral).
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="mx-auto max-w-6xl p-6">
+    <h2 class="text-2xl font-bold">Preguntas frecuentes</h2>
+    <div class="mt-3 grid gap-3 md:grid-cols-2">
+      <div class="rounded-xl bg-white ring-1 ring-gray-200 p-4">
+        <div class="font-semibold">¿Qué universidades cubren?</div>
+        <div class="text-sm text-gray-700 mt-1">UTP y UP. Seguiremos agregando más.</div>
+      </div>
+      <div class="rounded-xl bg-white ring-1 ring-gray-200 p-4">
+        <div class="font-semibold">¿Cómo activo mi plan?</div>
+        <div class="text-sm text-gray-700 mt-1">Con la KEY que te enviamos. Ve a <b>Mi cuenta</b> y actívala.</div>
+      </div>
+      <div class="rounded-xl bg-white ring-1 ring-gray-200 p-4">
+        <div class="font-semibold">¿Hay ranking?</div>
+        <div class="text-sm text-gray-700 mt-1">Sí. Puedes ver el Top global y tus mejores marcas.</div>
+      </div>
+      <div class="rounded-xl bg-white ring-1 ring-gray-200 p-4">
+        <div class="font-semibold">¿Puedo usarlo en el móvil?</div>
+        <div class="text-sm text-gray-700 mt-1">Sí. Funciona en cualquier navegador moderno.</div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="mx-auto max-w-6xl p-6 text-sm text-gray-600">
+    © 2025 IngresoU — Todos los derechos reservados ·
+    <a href="/leaderboard.html" class="underline">Ranking</a> ·
+    <a href="/premium.html" class="underline">Mi cuenta</a>
+  </footer>
+
+<script>
+// Construye enlace a WhatsApp con el plan seleccionado
+const buyBtns = document.querySelectorAll('.buyBtn');
+const whats = document.getElementById('whatsLink');
+let selectedPlan = 'Pro 60d — $29';
+function updateWhats(){
+  const txt = encodeURIComponent(`Hola 👋 Quiero comprar IngresoU. Plan: ${selectedPlan}. Mi correo es: `);
+  whats.href = `https://wa.me/50762796078?text=${txt}`;
+}
+buyBtns.forEach(b=> b.addEventListener('click', ()=>{ selectedPlan = b.dataset.plan; updateWhats(); window.location.hash = 'comprar'; scrollTo(0,document.getElementById('comprar').offsetTop - 20); }));
+updateWhats();
+</script>
+</body>
+</html>
