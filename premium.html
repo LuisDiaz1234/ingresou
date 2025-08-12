@@ -663,6 +663,101 @@ Vence: ${fmt(expires_at)} (${expired ? 'expirado' : d + ' días restantes'})`;
   }, true); // <-- capturing: intercepta antes del handler original
 })();
 </script>
+<script>
+/* IngresoU — Auto-login + auto-redeem en botón “Entrar” */
+(function () {
+  function findInputs(root=document){
+    const card = Array.from(root.querySelectorAll('div,section,form'))
+      .find(el => /inicia sesi[oó]n con tu key/i.test(el.textContent||''));
+    const scope = card || root;
+    const keyEl = scope.querySelector('input[name=key], input[placeholder*="UTP"], input[placeholder*="UP"], input[placeholder*="KEY"], input[type="text"]');
+    const mailEl = scope.querySelector('input[type=email], input[name=email], input[placeholder*="@"]');
+    return { keyEl, mailEl, card: scope };
+  }
+  function setStatus(msg, type='info'){
+    let el = document.getElementById('key-status');
+    if(!el){
+      el = document.createElement('div');
+      el.id = 'key-status';
+      el.style.marginTop = '8px';
+      el.style.fontSize = '12px';
+      (findInputs().card || document.body).appendChild(el);
+    }
+    const colors = {info:'#374151',ok:'#059669',warn:'#b45309',err:'#b91c1c'};
+    el.style.color = colors[type] || colors.info;
+    el.textContent = msg;
+  }
+  async function getSub(code,email){
+    const r = await fetch('/api/get-subscription', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ code, email })
+    });
+    return r.json();
+  }
+  async function redeem(code,email){
+    const r = await fetch('/api/redeem-key', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ code, email })
+    });
+    return r.json();
+  }
+  async function loginFlow(code,email){
+    setStatus('Verificando acceso…');
+    let res = await getSub(code,email);
+    if (res?.subscription) res = res.subscription;
+
+    if (res?.ok === false && res?.error === 'NOT_REDEEMED') {
+      setStatus('Activando tu KEY…');
+      const r2 = await redeem(code,email);
+      if (!(r2?.ok || r2?.error === 'ALREADY_REDEEMED')) {
+        setStatus('No se pudo activar: ' + (r2?.error || 'ERROR'), 'err');
+        return;
+      }
+      res = await getSub(code,email);
+      if (res?.subscription) res = res.subscription;
+    }
+
+    if (res?.ok === false) {
+      const err = res?.error || 'ERROR';
+      if (err === 'NOT_FOUND') setStatus('La KEY no existe en DB. Pulsa “Emitir en DB” en admin.html.','err');
+      else if (err === 'EXPIRED') setStatus('La KEY está vencida. Solicita renovación.','err');
+      else if (err === 'EMAIL_MISMATCH') setStatus('El correo no coincide con el de emisión.','err');
+      else setStatus('Error: ' + err,'err');
+      return;
+    }
+
+    // Guardar sesión y entrar
+    localStorage.setItem('ingresou_key', code);
+    localStorage.setItem('ingresou_email', email);
+    if (res.university) localStorage.setItem('ingresou_university', res.university);
+    if (res.plan)       localStorage.setItem('ingresou_plan',       res.plan);
+    if (res.expires_at) localStorage.setItem('ingresou_expires_at', res.expires_at);
+
+    setStatus('Acceso verificado. Entrando…','ok');
+    location.href = '/premium.html';
+  }
+
+  // Captura cualquier botón “Entrar” (antes del handler original)
+  document.addEventListener('click', (ev) => {
+    const btn = ev.target.closest('button, input[type=submit]');
+    if (!btn) return;
+    const label = (btn.textContent || btn.value || '').trim().toLowerCase();
+    if (label !== 'entrar') return;
+
+    const { keyEl, mailEl } = findInputs();
+    if (!keyEl || !mailEl) return;
+
+    ev.preventDefault();
+    ev.stopPropagation();
+
+    const code  = (keyEl.value || '').trim().toUpperCase();
+    const email = (mailEl.value || '').trim().toLowerCase();
+    if (!code || !email) { setStatus('Ingresa tu KEY y tu correo.','warn'); return; }
+
+    loginFlow(code,email).catch(e => { console.error(e); setStatus('Error de red/servidor.','err'); });
+  }, true);
+})();
+</script>
 
 </body>
 </html>
