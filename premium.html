@@ -49,7 +49,12 @@
       </div>
 
       <div class="mt-8">
-        <h3 class="text-lg font-semibold">Tus últimos resultados</h3>
+        <h3 class="text-lg font-semibold">Tus mejores marcas</h3>
+        <div id="bests" class="mt-3 grid gap-4 md:grid-cols-3"></div>
+      </div>
+
+      <div class="mt-8">
+        <h3 class="text-lg font-semibold">Tus últimos resultados (local)</h3>
         <div id="results" class="mt-2 text-sm text-gray-700"></div>
       </div>
     </section>
@@ -69,14 +74,16 @@
   </div>
 
 <script>
+const MODULES = ["Álgebra Básica","Razonamiento Lógico","Comprensión Lectora"];
 function getSession(){ try { return JSON.parse(localStorage.getItem('ingresou_session')||'null'); } catch { return null; } }
 function setSession(obj){ localStorage.setItem('ingresou_session', JSON.stringify(obj)); }
 function clearSession(){ localStorage.removeItem('ingresou_session'); }
+
 function loadResults(){
   try{
     const list = JSON.parse(localStorage.getItem('ingresou_results')||'[]');
     const box = document.getElementById('results');
-    if(!list.length){ box.textContent = 'Aún no tienes intentos. ¡Empieza un módulo!'; return; }
+    if(!list.length){ box.textContent = 'Aún no tienes intentos locales.'; return; }
     box.innerHTML = list.slice(0,10).map(r=>{
       const d = new Date(r.ts).toLocaleString();
       return `<div class="rounded-xl border p-2 mb-2 flex justify-between">
@@ -85,6 +92,27 @@ function loadResults(){
       </div>`;
     }).join('');
   }catch(e){}
+}
+
+async function fetchBest(code, email, module){
+  const r = await fetch('/api/my-best', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ code, email, module }) });
+  const data = await r.json();
+  return data && data.ok ? data.best : null;
+}
+
+async function loadBests(code, email){
+  const box = document.getElementById('bests');
+  box.innerHTML = '';
+  for (const m of MODULES){
+    const best = await fetchBest(code, email, m);
+    const html = `<div class="rounded-2xl bg-white p-4 ring-1 ring-gray-200">
+      <div class="text-sm font-semibold">${m}</div>
+      ${best ? `<div class="mt-1 text-sm">Mejor: <b>${best.score}/${best.total}</b> · ${Math.floor(best.ms/60000)}:${String(Math.floor(best.ms/1000)%60).padStart(2,'0')}</div>
+                <div class="text-xs text-gray-500">Fecha: ${new Date(best.created_at).toLocaleDateString()}</div>`
+             : `<div class="mt-1 text-sm text-gray-600">Aún no tienes marca. ¡Intenta el módulo!</div>`}
+    </div>`;
+    const el = document.createElement('div'); el.innerHTML = html; box.appendChild(el.firstChild);
+  }
 }
 
 async function verify(code, email){
@@ -98,25 +126,17 @@ async function boot(){
   const acc = document.getElementById('account');
   const login = document.getElementById('login');
   const s = getSession();
-  if (!s) {
-    status.textContent = 'Necesitas iniciar sesión con tu KEY.';
-    login.classList.remove('hidden');
-    return;
-  }
+  if (!s) { status.textContent = 'Necesitas iniciar sesión con tu KEY.'; login.classList.remove('hidden'); return; }
   status.textContent = 'Verificando…';
   const { ok, data } = await verify(s.code, s.email);
-  if (!ok) {
-    status.textContent = 'No pudimos verificar tu acceso ('+(data.error||'')+'). Inicia sesión de nuevo.';
-    login.classList.remove('hidden');
-    return;
-  }
-  status.className = 'mt-6 text-sm text-green-700';
-  status.textContent = '✔ Acceso verificado.';
+  if (!ok) { status.textContent = 'No pudimos verificar tu acceso ('+(data.error||'')+'). Inicia sesión de nuevo.'; login.classList.remove('hidden'); return; }
+  status.className = 'mt-6 text-sm text-green-700'; status.textContent = '✔ Acceso verificado.';
   document.getElementById('accUni').textContent = data.university;
   document.getElementById('accPlan').textContent = data.plan;
   document.getElementById('accExp').textContent = new Date(data.expires_at).toLocaleDateString();
   acc.classList.remove('hidden');
   loadResults();
+  loadBests(s.code, s.email);
 }
 
 document.getElementById('logoutBtn').addEventListener('click', ()=>{ clearSession(); location.reload(); });
@@ -126,13 +146,8 @@ document.getElementById('loginBtn').addEventListener('click', async ()=>{
   const msg = document.getElementById('loginMsg');
   msg.className = 'mt-3 text-sm text-gray-700'; msg.textContent = 'Verificando…';
   const { ok, data } = await verify(code, email);
-  if (ok) {
-    setSession({ code, email, at: Date.now() });
-    msg.className = 'mt-3 text-sm text-green-700'; msg.textContent = '✔ Acceso válido. Cargando…';
-    setTimeout(()=>location.reload(), 500);
-  } else {
-    msg.className = 'mt-3 text-sm text-red-700'; msg.textContent = '✖ '+(data.error||'No autorizado');
-  }
+  if (ok) { setSession({ code, email, at: Date.now() }); msg.className = 'mt-3 text-sm text-green-700'; msg.textContent = '✔ Acceso válido. Cargando…'; setTimeout(()=>location.reload(), 500); }
+  else { msg.className = 'mt-3 text-sm text-red-700'; msg.textContent = '✖ '+(data.error||'No autorizado'); }
 });
 
 boot();
