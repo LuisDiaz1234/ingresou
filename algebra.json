@@ -1,0 +1,290 @@
+[
+  {
+    "area": "Álgebra",
+    "q": "Resuelve: 2x + 2 = 5. ¿x = ?",
+    "options": [
+      "2.5",
+      "3.5",
+      "1.5",
+      "0.5"
+    ],
+    "a": 2,
+    "exp": "2x = 3 ⇒ x = 3/2 = 1.5."
+  },
+  {
+    "area": "Álgebra",
+    "q": "Resuelve: 3x + 3 = 8. ¿x = ?",
+    "options": [
+      "3.67",
+      "2.67",
+      "0.67",
+      "1.67"
+    ],
+    "a": 3,
+    "exp": "3x = 5 ⇒ x = 5/3 = 1.6666666666666667."
+  },
+  {
+    "area": "Álgebra",
+    "q": "Resuelve: 4x + 1 = 5. ¿x = ?",
+    "options": [
+      "2",
+      "0",
+      "3",
+      "1"
+    ],
+    "a": 3,
+    "exp": "4x = 4 ⇒ x = 4/4 = 1.0."
+  },
+  {
+    "area": "Álgebra",
+    "q": "Resuelve: 5x + 9 = 24. ¿x = ?",
+    "options": [
+      "4",
+      "5",
+      "2",
+      "3"
+    ],
+    "a": 3,
+    "exp": "5x = 15 ⇒ x = 15/5 = 3.0."
+  },
+  {
+    "area": "Álgebra",
+    "q": "Resuelve: 6x + 9 = 18. ¿x = ?",
+    "options": [
+      "1.5",
+      "0.5",
+      "3.5",
+      "2.5"
+    ],
+    "a": 0,
+    "exp": "6x = 9 ⇒ x = 9/6 = 1.5."
+  },
+  {
+    "area": "Álgebra",
+    "q": "Resuelve: 7x + 1 = 10. ¿x = ?",
+    "options": [
+      "1.29",
+      "0.29",
+      "2.29",
+      "3.29"
+    ],
+    "a": 0,
+    "exp": "7x = 9 ⇒ x = 9/7 = 1.2857142857142858."
+  },
+  {
+    "area": "Álgebra",
+    "q": "Resuelve: 8x + 3 = 11. ¿x = ?",
+    "options": [
+      "2",
+      "3",
+      "1",
+      "0"
+    ],
+    "a": 2,
+    "exp": "8x = 8 ⇒ x = 8/8 = 1.0."
+  },
+  {
+    "area": "Álgebra",
+    "q": "Resuelve: 9x + 7 = 8. ¿x = ?",
+    "options": [
+      "0.11",
+      "2.11",
+      "1.11",
+      "-0.89"
+    ],
+    "a": 0,
+    "exp": "9x = 1 ⇒ x = 1/9 = 0.1111111111111111."
+  },
+  {
+    "area": "Álgebra",
+    "q": "Un valor es 40% mayor que 45. ¿Cuál es el nuevo valor?",
+    "options": [
+      "45",
+      "63.0",
+      "68.0",
+      "58.0"
+    ],
+    "a": 1,
+    "exp": "Incremento = 45×40% = 18.0. Nuevo valor = 45+18.0 = 63.0."
+  },
+  {
+    "area": "Álgebra",
+    "q": "Un valor es 20% mayor que 50. ¿Cuál es el nuevo valor?",
+    "options": [
+      "60.0",
+      "50",
+      "55.0",
+      "65.0"
+    ],
+    "a": 0,
+    "exp": "Incremento = 50×20% = 10.0. Nuevo valor = 50+10.0 = 60.0."
+  },
+  {
+    "area": "Álgebra",
+    "q": "Un valor es 25% mayor que 64. ¿Cuál es el nuevo valor?",
+    "options": [
+      "64",
+      "85.0",
+      "75.0",
+      "80.0"
+    ],
+    "a": 3,
+    "exp": "Incremento = 64×25% = 16.0. Nuevo valor = 64+16.0 = 80.0."
+  },
+  {
+    "area": "Álgebra",
+    "q": "Un valor es 40% mayor que 77. ¿Cuál es el nuevo valor?",
+    "options": [
+      "77",
+      "112.8",
+      "102.8",
+      "107.8"
+    ],
+    "a": 3,
+    "exp": "Incremento = 77×40% = 30.8. Nuevo valor = 77+30.8 = 107.8."
+  },
+  {
+    "area": "Álgebra",
+    "q": "Un valor es 20% mayor que 75. ¿Cuál es el nuevo valor?",
+    "options": [
+      "90.0",
+      "75",
+      "95.0",
+      "85.0"
+    ],
+    "a": 0,
+    "exp": "Incremento = 75×20% = 15.0. Nuevo valor = 75+15.0 = 90.0."
+  },
+  {
+    "area": "Álgebra",
+    "q": "Un valor es 12% mayor que 87. ¿Cuál es el nuevo valor?",
+    "options": [
+      "92.44",
+      "87",
+      "97.44",
+      "102.44"
+    ],
+    "a": 2,
+    "exp": "Incremento = 87×12% = 10.44. Nuevo valor = 87+10.44 = 97.44."
+  },
+  {
+    "area": "Álgebra",
+    "q": "Un valor es 30% mayor que 159. ¿Cuál es el nuevo valor?",
+    "options": [
+      "159",
+      "201.7",
+      "211.7",
+      "206.7"
+    ],
+    "a": 3,
+    "exp": "Incremento = 159×30% = 47.7. Nuevo valor = 159+47.7 = 206.7."
+  },
+  {
+    "area": "Álgebra",
+    "q": "Un valor es 25% mayor que 133. ¿Cuál es el nuevo valor?",
+    "options": [
+      "171.25",
+      "161.25",
+      "166.25",
+      "133"
+    ],
+    "a": 2,
+    "exp": "Incremento = 133×25% = 33.25. Nuevo valor = 133+33.25 = 166.25."
+  },
+  {
+    "area": "Álgebra",
+    "q": "Simplifica: 5(x - 4) + 5(x + 4)",
+    "options": [
+      "10x",
+      "10x + 20",
+      "10x - 20",
+      "5x"
+    ],
+    "a": 0,
+    "exp": "5x-20+5x+20 = 10x."
+  },
+  {
+    "area": "Álgebra",
+    "q": "Simplifica: 2(x - 3) + 2(x + 3)",
+    "options": [
+      "4x + 6",
+      "4x - 6",
+      "2x",
+      "4x"
+    ],
+    "a": 3,
+    "exp": "2x-6+2x+6 = 4x."
+  },
+  {
+    "area": "Álgebra",
+    "q": "Simplifica: 4(x - 2) + 4(x + 2)",
+    "options": [
+      "8x",
+      "8x + 8",
+      "8x - 8",
+      "4x"
+    ],
+    "a": 0,
+    "exp": "4x-8+4x+8 = 8x."
+  },
+  {
+    "area": "Álgebra",
+    "q": "Simplifica: 3(x - 5) + 3(x + 5)",
+    "options": [
+      "6x",
+      "3x",
+      "6x - 15",
+      "6x + 15"
+    ],
+    "a": 0,
+    "exp": "3x-15+3x+15 = 6x."
+  },
+  {
+    "area": "Álgebra",
+    "q": "Simplifica: 3(x - 4) + 3(x + 4)",
+    "options": [
+      "6x - 12",
+      "6x + 12",
+      "6x",
+      "3x"
+    ],
+    "a": 2,
+    "exp": "3x-12+3x+12 = 6x."
+  },
+  {
+    "area": "Álgebra",
+    "q": "Simplifica: 6(x - 5) + 6(x + 5)",
+    "options": [
+      "12x - 30",
+      "12x",
+      "6x",
+      "12x + 30"
+    ],
+    "a": 1,
+    "exp": "6x-30+6x+30 = 12x."
+  },
+  {
+    "area": "Álgebra",
+    "q": "Simplifica: 3(x - 6) + 3(x + 6)",
+    "options": [
+      "3x",
+      "6x - 18",
+      "6x",
+      "6x + 18"
+    ],
+    "a": 2,
+    "exp": "3x-18+3x+18 = 6x."
+  },
+  {
+    "area": "Álgebra",
+    "q": "Simplifica: 2(x - 3) + 2(x + 3)",
+    "options": [
+      "4x",
+      "4x + 6",
+      "4x - 6",
+      "2x"
+    ],
+    "a": 0,
+    "exp": "2x-6+2x+6 = 4x."
+  }
+]

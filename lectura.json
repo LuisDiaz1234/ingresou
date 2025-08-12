@@ -1,0 +1,290 @@
+[
+  {
+    "area": "Lectura",
+    "q": "Lee: 'Los manglares protegen la costa al reducir la energía de las olas y albergan gran biodiversidad.' ¿Cuál es la respuesta correcta?",
+    "options": [
+      "Son barreras costeras y hábitat de especies.",
+      "Consumen mucha agua.",
+      "No aportan beneficios.",
+      "Solo sirven para pescar."
+    ],
+    "a": 0,
+    "exp": "Protección costera + biodiversidad."
+  },
+  {
+    "area": "Lectura",
+    "q": "Lee: 'La fotosíntesis convierte dióxido de carbono y agua en glucosa y oxígeno usando luz.' ¿Cuál es la respuesta correcta?",
+    "options": [
+      "Glucosa y oxígeno.",
+      "Luz, agua y dióxido de carbono.",
+      "Solo dióxido de carbono.",
+      "Solo agua."
+    ],
+    "a": 1,
+    "exp": "Reactivos: luz, agua y CO₂."
+  },
+  {
+    "area": "Lectura",
+    "q": "Lee: 'El autor critica el tráfico y propone ampliar el transporte público para reducir emisiones.' ¿Cuál es la respuesta correcta?",
+    "options": [
+      "Argumentativo.",
+      "Descriptivo",
+      "Lírico",
+      "Narrativo"
+    ],
+    "a": 0,
+    "exp": "Opina y propone ⇒ argumentativo."
+  },
+  {
+    "area": "Lectura",
+    "q": "Lee: 'A pesar de la lluvia, el partido continuó.' ¿Cuál es la respuesta correcta?",
+    "options": [
+      "Oposición/contraste.",
+      "Secuencia",
+      "Causa",
+      "Consecuencia"
+    ],
+    "a": 0,
+    "exp": "Concesión/contraste."
+  },
+  {
+    "area": "Lectura",
+    "q": "Lee: 'El colibrí bate sus alas unas 50 veces por segundo.' ¿Cuál es la respuesta correcta?",
+    "options": [
+      "Subjetivo",
+      "Metafórico",
+      "Cualitativo",
+      "Cuantitativo."
+    ],
+    "a": 3,
+    "exp": "Dato medible."
+  },
+  {
+    "area": "Lectura",
+    "q": "Lee: 'La capa de ozono filtra radiación ultravioleta dañina.' ¿Cuál es la respuesta correcta?",
+    "options": [
+      "Igual radiación",
+      "Menos radiación UV",
+      "No tiene relación",
+      "Sin ella llegaría más radiación UV."
+    ],
+    "a": 3,
+    "exp": "Sin filtro llega más radiación UV."
+  },
+  {
+    "area": "Lectura",
+    "q": "'Sin embargo' es un conector de:",
+    "options": [
+      "Secuencia",
+      "Contraste",
+      "Consecuencia",
+      "Adición"
+    ],
+    "a": 1,
+    "exp": "Sin embargo ⇒ Contraste."
+  },
+  {
+    "area": "Lectura",
+    "q": "'Por lo tanto' es un conector de:",
+    "options": [
+      "Adición",
+      "Secuencia",
+      "Consecuencia",
+      "Contraste"
+    ],
+    "a": 2,
+    "exp": "Por lo tanto ⇒ Consecuencia."
+  },
+  {
+    "area": "Lectura",
+    "q": "'Además' es un conector de:",
+    "options": [
+      "Consecuencia",
+      "Secuencia",
+      "Adición",
+      "Contraste"
+    ],
+    "a": 2,
+    "exp": "Además ⇒ Adición."
+  },
+  {
+    "area": "Lectura",
+    "q": "'Primero' es un conector de:",
+    "options": [
+      "Consecuencia",
+      "Adición",
+      "Secuencia",
+      "Contraste"
+    ],
+    "a": 2,
+    "exp": "Primero ⇒ Secuencia."
+  },
+  {
+    "area": "Lectura",
+    "q": "Propósito del texto: El texto define 'ecosistema' y da ejemplos.",
+    "options": [
+      "Narrar",
+      "Argumentar",
+      "Exponer/explicar",
+      "Entretener"
+    ],
+    "a": 2,
+    "exp": "Identifica la intención comunicativa."
+  },
+  {
+    "area": "Lectura",
+    "q": "Propósito del texto: El autor intenta convencer sobre el reciclaje.",
+    "options": [
+      "Argumentar",
+      "Narrar",
+      "Entretener",
+      "Exponer/explicar"
+    ],
+    "a": 0,
+    "exp": "Identifica la intención comunicativa."
+  },
+  {
+    "area": "Lectura",
+    "q": "Propósito del texto: Se narra un hecho con personajes y tiempo.",
+    "options": [
+      "Argumentar",
+      "Narrar",
+      "Entretener",
+      "Exponer/explicar"
+    ],
+    "a": 1,
+    "exp": "Identifica la intención comunicativa."
+  },
+  {
+    "area": "Lectura",
+    "q": "¿Qué oración representa mejor la idea principal de un párrafo?",
+    "options": [
+      "Principal",
+      "Secundaria",
+      "Irrelevante",
+      "Contradictoria"
+    ],
+    "a": 0,
+    "exp": "La idea principal resume el tema central."
+  },
+  {
+    "area": "Lectura",
+    "q": "¿Qué oración representa mejor la idea principal de un párrafo?",
+    "options": [
+      "Principal",
+      "Secundaria",
+      "Irrelevante",
+      "Contradictoria"
+    ],
+    "a": 0,
+    "exp": "La idea principal resume el tema central."
+  },
+  {
+    "area": "Lectura",
+    "q": "¿Qué oración representa mejor la idea principal de un párrafo?",
+    "options": [
+      "Principal",
+      "Secundaria",
+      "Irrelevante",
+      "Contradictoria"
+    ],
+    "a": 0,
+    "exp": "La idea principal resume el tema central."
+  },
+  {
+    "area": "Lectura",
+    "q": "¿Qué oración representa mejor la idea principal de un párrafo?",
+    "options": [
+      "Principal",
+      "Secundaria",
+      "Irrelevante",
+      "Contradictoria"
+    ],
+    "a": 0,
+    "exp": "La idea principal resume el tema central."
+  },
+  {
+    "area": "Lectura",
+    "q": "¿Qué oración representa mejor la idea principal de un párrafo?",
+    "options": [
+      "Principal",
+      "Secundaria",
+      "Irrelevante",
+      "Contradictoria"
+    ],
+    "a": 0,
+    "exp": "La idea principal resume el tema central."
+  },
+  {
+    "area": "Lectura",
+    "q": "¿Qué oración representa mejor la idea principal de un párrafo?",
+    "options": [
+      "Principal",
+      "Secundaria",
+      "Irrelevante",
+      "Contradictoria"
+    ],
+    "a": 0,
+    "exp": "La idea principal resume el tema central."
+  },
+  {
+    "area": "Lectura",
+    "q": "¿Qué oración representa mejor la idea principal de un párrafo?",
+    "options": [
+      "Principal",
+      "Secundaria",
+      "Irrelevante",
+      "Contradictoria"
+    ],
+    "a": 0,
+    "exp": "La idea principal resume el tema central."
+  },
+  {
+    "area": "Lectura",
+    "q": "¿Qué oración representa mejor la idea principal de un párrafo?",
+    "options": [
+      "Principal",
+      "Secundaria",
+      "Irrelevante",
+      "Contradictoria"
+    ],
+    "a": 0,
+    "exp": "La idea principal resume el tema central."
+  },
+  {
+    "area": "Lectura",
+    "q": "¿Qué oración representa mejor la idea principal de un párrafo?",
+    "options": [
+      "Principal",
+      "Secundaria",
+      "Irrelevante",
+      "Contradictoria"
+    ],
+    "a": 0,
+    "exp": "La idea principal resume el tema central."
+  },
+  {
+    "area": "Lectura",
+    "q": "¿Qué oración representa mejor la idea principal de un párrafo?",
+    "options": [
+      "Principal",
+      "Secundaria",
+      "Irrelevante",
+      "Contradictoria"
+    ],
+    "a": 0,
+    "exp": "La idea principal resume el tema central."
+  },
+  {
+    "area": "Lectura",
+    "q": "¿Qué oración representa mejor la idea principal de un párrafo?",
+    "options": [
+      "Principal",
+      "Secundaria",
+      "Irrelevante",
+      "Contradictoria"
+    ],
+    "a": 0,
+    "exp": "La idea principal resume el tema central."
+  }
+]

@@ -21,149 +21,71 @@
     <div id="app" class="mt-4 rounded-2xl bg-white p-5 ring-1 ring-gray-200 shadow"></div>
   </div>
 
+
+<script>
+async function ensureSession(){
+  const s = JSON.parse(localStorage.getItem('ingresou_session')||'null');
+  if(!s){ location.href = '/premium.html'; return null; }
+  try{
+    const r = await fetch('/api/get-subscription', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ code: s.code, email: s.email })});
+    const data = await r.json();
+    if(!(r.ok && data.ok)){ location.href = '/premium.html'; return null; }
+    return {session:s, sub:data};
+  }catch(e){ location.href = '/premium.html'; return null; }
+}
+</script>
+
+
+<script>
+function shuffle(arr){ for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; } return arr; }
+function pickN(arr,n){ const a=[...arr]; shuffle(a); return a.slice(0, Math.min(n,a.length)); }
+function saveLocal(moduleName, score, total, ms){
+  try{ const key='ingresou_results'; const list=JSON.parse(localStorage.getItem(key)||'[]'); list.unshift({module:moduleName,score,total,ms,ts:Date.now()}); while(list.length>50) list.pop(); localStorage.setItem(key, JSON.stringify(list)); }catch(e){}
+}
+function fmtMs(ms){ const s=Math.max(0,Math.round(ms/1000)); const m=Math.floor(s/60), r=s%60; return String(m).padStart(2,'0')+':'+String(r).padStart(2,'0'); }
+async function submitGlobal(moduleName, score, total, ms){
+  const s = JSON.parse(localStorage.getItem('ingresou_session')||'null'); if(!s) return {ok:false};
+  try{
+    const r = await fetch('/api/submit-score', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ code: s.code, email: s.email, module: moduleName, score, total, ms })});
+    return await r.json();
+  }catch(e){ return {ok:false}; }
+}
+async function fetchTop(moduleName, limit=10){
+  try{ const r= await fetch('/api/top-scores?module='+encodeURIComponent(moduleName)+'&limit='+limit); const j= await r.json(); return j && j.ok ? j.top : []; }catch(e){ return []; }
+}
+</script>
+
 <script>
 const MODULE_NAME = "Comprensión Lectora";
 const TOTAL_SECONDS = 12*60;
-const QUESTIONS = [
-  {
-    "q": "Lee: 'Los manglares protegen la costa al reducir la energía de las olas y albergan gran biodiversidad.' ¿Cuál es la idea principal?",
-    "options": [
-      "Los manglares consumen mucha agua.",
-      "Son barreras costeras y hábitat de especies.",
-      "Solo sirven para pescar.",
-      "No aportan beneficios."
-    ],
-    "a": 1,
-    "exp": "Protección costera + biodiversidad."
-  },
-  {
-    "q": "Lee: 'La fotosíntesis convierte dióxido de carbono y agua en glucosa y oxígeno usando luz.' ¿Qué se necesita?",
-    "options": [
-      "Glucosa y oxígeno",
-      "Luz, agua y dióxido de carbono",
-      "Solo dióxido de carbono",
-      "Solo agua"
-    ],
-    "a": 1,
-    "exp": "Luz, agua y CO₂."
-  },
-  {
-    "q": "En el texto: 'El autor critica el tráfico y propone ampliar el transporte público', el tono es:",
-    "options": [
-      "Narrativo",
-      "Descriptivo",
-      "Argumentativo",
-      "Lírico"
-    ],
-    "a": 2,
-    "exp": "Opina y propone ⇒ argumentativo."
-  },
-  {
-    "q": "Lee: 'A pesar de la lluvia, el partido continuó.' La conjunción 'A pesar de' indica:",
-    "options": [
-      "Causa",
-      "Oposición/contraste",
-      "Consecuencia",
-      "Secuencia"
-    ],
-    "a": 1,
-    "exp": "Concesión/contraste."
-  },
-  {
-    "q": "Lee: 'El colibrí bate sus alas unas 50 veces por segundo.' ¿Qué tipo de dato es '50 veces por segundo'?",
-    "options": [
-      "Cualitativo",
-      "Subjetivo",
-      "Cuantitativo",
-      "Metafórico"
-    ],
-    "a": 2,
-    "exp": "Dato medible."
-  },
-  {
-    "q": "Según 'Los terremotos son impredecibles', se afirma que:",
-    "options": [
-      "Siempre se sabe cuándo ocurrirán",
-      "No se pueden predecir con exactitud",
-      "Son muy leves",
-      "Ocurren a la misma hora"
-    ],
-    "a": 1,
-    "exp": "No se predicen con exactitud."
-  },
-  {
-    "q": "En 'Muchos jóvenes leen en pantallas', 'pantallas' se refiere a:",
-    "options": [
-      "Televisores únicamente",
-      "Dispositivos como móviles y tabletas",
-      "Libros impresos",
-      "Pizarras"
-    ],
-    "a": 1,
-    "exp": "Dispositivos electrónicos."
-  },
-  {
-    "q": "Si un párrafo define un concepto y da ejemplos, su propósito es:",
-    "options": [
-      "Narrar sucesos",
-      "Exponer/explicar",
-      "Convencer",
-      "Entretener"
-    ],
-    "a": 1,
-    "exp": "Exponer."
-  },
-  {
-    "q": "'Sin embargo' es un conector de:",
-    "options": [
-      "Causa",
-      "Adición",
-      "Contraste",
-      "Tiempo"
-    ],
-    "a": 2,
-    "exp": "Contraste."
-  },
-  {
-    "q": "'La capa de ozono filtra radiación ultravioleta' implica que su ausencia causaría:",
-    "options": [
-      "Menos radiación UV",
-      "Más radiación UV",
-      "Igual radiación",
-      "No tiene relación"
-    ],
-    "a": 1,
-    "exp": "Más radiación UV."
-  }
-];
 
-function getSession(){ try { return JSON.parse(localStorage.getItem('ingresou_session')||'null'); } catch { return null; } }
-function saveResult(moduleName, score, total, ms){ try{ const key='ingresou_results'; const list=JSON.parse(localStorage.getItem(key)||'[]'); list.unshift({module:moduleName,score,total,ms,ts:Date.now()}); while(list.length>50) list.pop(); localStorage.setItem(key, JSON.stringify(list)); }catch(e){} }
-function fmtMs(ms){ const s=Math.max(0,Math.round(ms/1000)); const m=Math.floor(s/60), r=s%60; return String(m).padStart(2,'0')+':'+String(r).padStart(2,'0'); }
+async function loadBank(){
+  const r = await fetch("/bank/lectura.json"); const data = await r.json();
+  // pick random 10 and shuffle options
+  const qs = pickN(data, 10).map(q=>({...q, options: shuffle([...q.options])}));
+  // fix answer indices after shuffle
+  for(const q of qs){ const correctText = data.find(x=>x.q===q.q).options[data.find(x=>x.q===q.q).a]; q.a = q.options.indexOf(correctText); }
+  return qs;
+}
 
-async function submitGlobal(code,email,score,total,ms){ try { const r=await fetch('/api/submit-score', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ code, email, module: MODULE_NAME, score, total, ms }) }); return await r.json(); } catch(e) { return { ok:false }; } }
-async function fetchTop(){ try{ const r=await fetch('/api/top-scores?module='+encodeURIComponent(MODULE_NAME)); const j=await r.json(); return j && j.ok ? j.top : []; }catch(e){ return []; } }
-
-function startQuiz(){
-  const s = getSession(); if(!s) { location.href='/premium.html'; return; }
-  let i = 0; const answers = new Array(QUESTIONS.length).fill(null); let finished=false; let remaining=TOTAL_SECONDS;
+function startQuiz(QUESTIONS){
+  let i=0; let finished=false; const answers=new Array(QUESTIONS.length).fill(null);
   const root=document.getElementById('app'); const pbar=document.getElementById('pbar'); const timer=document.getElementById('timer');
-  timer.textContent=fmtMs(remaining);
-  const tHandle=setInterval(()=>{ if(finished) return; remaining--; if(remaining<=0){remaining=0; finished=true; render();} timer.textContent=fmtMs(remaining); },1000);
+  let remaining=TOTAL_SECONDS; timer.textContent=fmtMs(remaining); const tHandle=setInterval(()=>{ if(finished) return; remaining--; if(remaining<=0){remaining=0; finished=true; render();} timer.textContent=fmtMs(remaining); },1000);
 
   async function render(){
     root.innerHTML=''; pbar.style.width=Math.round((i/QUESTIONS.length)*100)+'%';
     if(!finished){
-      const q=QUESTIONS[i]; const wrap=document.createElement('div'); wrap.innerHTML=`
+      const q=QUESTIONS[i];
+      const wrap=document.createElement('div'); wrap.innerHTML=`
         <div class="text-sm text-gray-600">Pregunta ${i+1} de ${QUESTIONS.length}</div>
         <div class="mt-2 text-lg font-medium">${q.q}</div>
         <div class="mt-4 space-y-2"></div>
         <div class="mt-4 flex justify-between">
           <button id="prevBtn" class="rounded-xl border px-4 py-2">Anterior</button>
-          <button id="nextBtn" class="rounded-xl bg-indigo-600 px-4 py-2 text-white">${i<QUESTIONS.length-1?'Siguiente':'Finalizar'}</button>
-        </div>`;
+          <button id="nextBtn" class="rounded-xl bg-indigo-600 px-4 py-2 text-white">${i<QUESTIONS.length-1?'Siguiente':'Finalizar'}</button>`;
       const list=wrap.children[2];
-      q.options.forEach((opt,idx)=>{ const btn=document.createElement('button'); btn.className="w-full rounded-xl border px-4 py-2 text-left hover:bg-gray-50 "+(answers[i]===idx?"ring-2 ring-indigo-500":""); btn.innerHTML=`<span class="mr-2">${String.fromCharCode(65+idx)}.</span> ${opt}`; btn.onclick=()=>{ answers[i]=idx; render(); }; list.appendChild(btn); });
+      q.options.forEach((opt,idx)=>{ const b=document.createElement('button'); b.className="w-full rounded-xl border px-4 py-2 text-left hover:bg-gray-50 " + (answers[i]===idx?"ring-2 ring-indigo-500":""); b.innerHTML=`<span class="mr-2">${String.fromCharCode(65+idx)}.</span> ${opt}`; b.onclick=()=>{ answers[i]=idx; render(); }; list.appendChild(b); });
       root.appendChild(wrap);
       document.getElementById('prevBtn').onclick=()=>{ if(i>0){i--; render();} };
       document.getElementById('nextBtn').onclick=()=>{ if(i<QUESTIONS.length-1){i++; render();} else {finished=true; render();} };
@@ -175,12 +97,12 @@ function startQuiz(){
           <div class="mt-1 font-medium">${q.q}</div>
           <div class="mt-1 text-sm"><b>Tu respuesta:</b> ${chosen}</div>
           <div class="mt-1 text-sm"><b>Correcta:</b> ${q.options[q.a]}</div>
-          <div class="mt-1 text-sm text-gray-700">${q.exp}</div>
+          <div class="mt-1 text-sm text-gray-700">${q.exp||''}</div>
         </div>`; });
-      saveResult(MODULE_NAME, correct, QUESTIONS.length, elapsed);
-      const global = await submitGlobal(s.code, s.email, correct, QUESTIONS.length, elapsed);
-      const top = global && global.ok ? global.top : await fetchTop();
-      const topHtml = (top||[]).map((r,idx)=>{ const mm=Math.floor(r.ms/60000); const ss=String(Math.floor(r.ms/1000)%60).padStart(2,'0'); const d=new Date(r.created_at).toLocaleDateString(); return `<div class="flex justify-between text-sm"><span>#${idx+1} — ${r.score}/${r.total}</span><span>${mm}:${ss} · ${d}</span></div>`; }).join('');
+      saveLocal(MODULE_NAME, correct, QUESTIONS.length, elapsed);
+      const global = await submitGlobal(MODULE_NAME, correct, QUESTIONS.length, elapsed);
+      const top = global && global.ok ? global.top : await fetchTop(MODULE_NAME,10);
+      const topHtml=(top||[]).map((r,idx)=>{ const mm=Math.floor(r.ms/60000), ss=String(Math.floor(r.ms/1000)%60).padStart(2,'0'); const d=new Date(r.created_at).toLocaleDateString(); return `<div class="flex justify-between text-sm"><span>#${idx+1} — ${r.score}/${r.total}</span><span>${mm}:${ss} · ${d}</span></div>`; }).join('');
       const wrap=document.createElement('div'); wrap.innerHTML=`
         <div class="text-lg font-semibold">Resultado: ${correct} / ${QUESTIONS.length}</div>
         <div class="text-sm text-gray-600">Tiempo usado: ${fmtMs(elapsed)}</div>
@@ -194,12 +116,13 @@ function startQuiz(){
         </div>
         <div class="mt-4">${review}</div>`;
       root.appendChild(wrap);
-      document.getElementById('retry').onclick=()=>{ i=0; for(let k=0;k<answers.length;k++) answers[k]=null; finished=false; remaining=TOTAL_SECONDS; startQuiz(); };
+      document.getElementById('retry').onclick=()=>{ location.reload(); };
     }
   }
   render();
 }
-startQuiz();
+
+ensureSession().then(async s=>{ if(!s) return; const qs=await loadBank(); startQuiz(qs); });
 </script>
 </body>
 </html>

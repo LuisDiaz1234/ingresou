@@ -1,0 +1,290 @@
+[
+  {
+    "area": "Lógico",
+    "q": "Completa la serie: 3, 6, 12, 24, 48, __",
+    "options": [
+      "100",
+      "94",
+      "98",
+      "96"
+    ],
+    "a": 3,
+    "exp": "Patrón multiplicativo."
+  },
+  {
+    "area": "Lógico",
+    "q": "Completa la serie: 4, 8, 16, 32, 64, __",
+    "options": [
+      "128",
+      "130",
+      "126",
+      "132"
+    ],
+    "a": 0,
+    "exp": "Patrón multiplicativo."
+  },
+  {
+    "area": "Lógico",
+    "q": "Completa la serie: 5, 10, 20, 40, 80, __",
+    "options": [
+      "162",
+      "164",
+      "158",
+      "160"
+    ],
+    "a": 3,
+    "exp": "Patrón multiplicativo."
+  },
+  {
+    "area": "Lógico",
+    "q": "Serie: 2, 5, 9, 14, 20, __",
+    "options": [
+      "27",
+      "28",
+      "29",
+      "26"
+    ],
+    "a": 0,
+    "exp": "Diferencias +3,+4,+5,+6,…"
+  },
+  {
+    "area": "Lógico",
+    "q": "Serie: 5, 8, 12, 17, 23, __",
+    "options": [
+      "32",
+      "29",
+      "31",
+      "30"
+    ],
+    "a": 3,
+    "exp": "Diferencias +3,+4,+5,+6,…"
+  },
+  {
+    "area": "Lógico",
+    "q": "Serie: 7, 10, 14, 19, 25, __",
+    "options": [
+      "31",
+      "32",
+      "34",
+      "33"
+    ],
+    "a": 1,
+    "exp": "Diferencias +3,+4,+5,+6,…"
+  },
+  {
+    "area": "Lógico",
+    "q": "¿Cuál no pertenece? {cuadrado, triángulo, círculo, cubo}",
+    "options": [
+      "triángulo",
+      "cuadrado",
+      "cubo",
+      "círculo"
+    ],
+    "a": 2,
+    "exp": "Cubo es 3D"
+  },
+  {
+    "area": "Lógico",
+    "q": "¿Cuál no pertenece? {perro, gato, tigre, roble}",
+    "options": [
+      "roble",
+      "gato",
+      "tigre",
+      "perro"
+    ],
+    "a": 0,
+    "exp": "Roble es un árbol"
+  },
+  {
+    "area": "Lógico",
+    "q": "¿Cuál no pertenece? {manzana, pera, plátano, lechuga}",
+    "options": [
+      "plátano",
+      "lechuga",
+      "manzana",
+      "pera"
+    ],
+    "a": 1,
+    "exp": "Lechuga no es fruta"
+  },
+  {
+    "area": "Lógico",
+    "q": "Analogía: pez es a agua como ave es a __",
+    "options": [
+      "fuego",
+      "agua",
+      "tierra",
+      "aire"
+    ],
+    "a": 3,
+    "exp": "Relación equivalente."
+  },
+  {
+    "area": "Lógico",
+    "q": "Analogía: pintor es a pincel como escritor es a __",
+    "options": [
+      "fuego",
+      "pincel",
+      "pluma",
+      "tierra"
+    ],
+    "a": 2,
+    "exp": "Relación equivalente."
+  },
+  {
+    "area": "Lógico",
+    "q": "Analogía: abeja es a miel como vaca es a __",
+    "options": [
+      "fuego",
+      "tierra",
+      "leche",
+      "miel"
+    ],
+    "a": 2,
+    "exp": "Relación equivalente."
+  },
+  {
+    "area": "Lógico",
+    "q": "Si todos los A son B y todos los B son C, entonces:",
+    "options": [
+      "Todos los A son C",
+      "Todos los C son A",
+      "Algunos C no son A",
+      "Ninguna"
+    ],
+    "a": 0,
+    "exp": "Transitividad: A⊂B⊂C ⇒ A⊂C."
+  },
+  {
+    "area": "Lógico",
+    "q": "Si 2 trabajadores hacen una obra en 8 días, con 4 trabajadores (misma eficiencia) tardarán:",
+    "options": [
+      "16 días",
+      "8 días",
+      "5 días",
+      "4 días"
+    ],
+    "a": 3,
+    "exp": "Doble personal ⇒ mitad de tiempo."
+  },
+  {
+    "area": "Lógico",
+    "q": "Si 2 trabajadores hacen una obra en 13 días, con 4 trabajadores (misma eficiencia) tardarán:",
+    "options": [
+      "26 días",
+      "10 días",
+      "6 días",
+      "13 días"
+    ],
+    "a": 2,
+    "exp": "Doble personal ⇒ mitad de tiempo."
+  },
+  {
+    "area": "Lógico",
+    "q": "Si 6 trabajadores hacen una obra en 7 días, con 12 trabajadores (misma eficiencia) tardarán:",
+    "options": [
+      "3 días",
+      "7 días",
+      "4 días",
+      "14 días"
+    ],
+    "a": 0,
+    "exp": "Doble personal ⇒ mitad de tiempo."
+  },
+  {
+    "area": "Lógico",
+    "q": "Si 6 trabajadores hacen una obra en 8 días, con 12 trabajadores (misma eficiencia) tardarán:",
+    "options": [
+      "4 días",
+      "5 días",
+      "8 días",
+      "16 días"
+    ],
+    "a": 0,
+    "exp": "Doble personal ⇒ mitad de tiempo."
+  },
+  {
+    "area": "Lógico",
+    "q": "Si 6 trabajadores hacen una obra en 12 días, con 12 trabajadores (misma eficiencia) tardarán:",
+    "options": [
+      "12 días",
+      "24 días",
+      "9 días",
+      "6 días"
+    ],
+    "a": 3,
+    "exp": "Doble personal ⇒ mitad de tiempo."
+  },
+  {
+    "area": "Lógico",
+    "q": "Si 4 trabajadores hacen una obra en 5 días, con 8 trabajadores (misma eficiencia) tardarán:",
+    "options": [
+      "2 días",
+      "2 días",
+      "10 días",
+      "5 días"
+    ],
+    "a": 0,
+    "exp": "Doble personal ⇒ mitad de tiempo."
+  },
+  {
+    "area": "Lógico",
+    "q": "Si 2 trabajadores hacen una obra en 15 días, con 4 trabajadores (misma eficiencia) tardarán:",
+    "options": [
+      "15 días",
+      "30 días",
+      "12 días",
+      "7 días"
+    ],
+    "a": 3,
+    "exp": "Doble personal ⇒ mitad de tiempo."
+  },
+  {
+    "area": "Lógico",
+    "q": "Si 2 trabajadores hacen una obra en 10 días, con 4 trabajadores (misma eficiencia) tardarán:",
+    "options": [
+      "10 días",
+      "7 días",
+      "20 días",
+      "5 días"
+    ],
+    "a": 3,
+    "exp": "Doble personal ⇒ mitad de tiempo."
+  },
+  {
+    "area": "Lógico",
+    "q": "Si 9 trabajadores hacen una obra en 12 días, con 18 trabajadores (misma eficiencia) tardarán:",
+    "options": [
+      "9 días",
+      "6 días",
+      "24 días",
+      "12 días"
+    ],
+    "a": 1,
+    "exp": "Doble personal ⇒ mitad de tiempo."
+  },
+  {
+    "area": "Lógico",
+    "q": "Si 6 trabajadores hacen una obra en 14 días, con 12 trabajadores (misma eficiencia) tardarán:",
+    "options": [
+      "28 días",
+      "14 días",
+      "7 días",
+      "11 días"
+    ],
+    "a": 2,
+    "exp": "Doble personal ⇒ mitad de tiempo."
+  },
+  {
+    "area": "Lógico",
+    "q": "Si 5 trabajadores hacen una obra en 8 días, con 10 trabajadores (misma eficiencia) tardarán:",
+    "options": [
+      "16 días",
+      "8 días",
+      "5 días",
+      "4 días"
+    ],
+    "a": 3,
+    "exp": "Doble personal ⇒ mitad de tiempo."
+  }
+]
