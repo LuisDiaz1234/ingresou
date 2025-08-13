@@ -1,73 +1,69 @@
-<!doctype html>
+
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>IngresoU — Ranking</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style> body { background: #f6f7ff; } </style>
+  <!-- PAGES PATCH 1755048408 -->
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,"Noto Sans",sans-serif;max-width:960px;margin:40px auto;padding:0 16px;color:#111}
+    .card{border:1px solid #E5E7EB;border-radius:12px;padding:16px;background:#fff;margin-top:12px}
+    table{width:100%;border-collapse:collapse;margin-top:8px}
+    th,td{padding:10px;border-bottom:1px solid #F3F4F6;text-align:left;font-size:14px}
+    th{font-weight:600;color:#374151}
+    .mut{color:#6B7280}
+    .badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px;background:#EEF2FF;color:#3730A3}
+  </style>
 </head>
-<body class="text-gray-900">
-  <div class="mx-auto max-w-4xl p-6">
-    <header class="flex items-center justify-between">
-      <h1 class="text-2xl font-bold">Ranking — IngresoU</h1>
-      <a href="/premium.html" class="rounded-xl border px-3 py-1 text-sm">Mi cuenta</a>
-    </header>
+<body>
+  
+<header style="display:flex;justify-content:space-between;align-items:center;padding:12px 0">
+  <div style="font-weight:700;font-size:20px;">IngresoU</div>
+  <nav style="display:flex;gap:12px;">
+    <a href="/premium.html">Mi cuenta</a>
+    <a href="/leaderboard.html">Ranking</a>
+  </nav>
+</header>
 
-    <div class="mt-4 rounded-2xl bg-white p-4 ring-1 ring-gray-200">
-      <div class="flex flex-wrap items-center gap-2">
-        <button data-m="Álgebra Básica" class="tab rounded-xl px-3 py-1 bg-indigo-600 text-white">Álgebra Básica</button>
-        <button data-m="Razonamiento Lógico" class="tab rounded-xl px-3 py-1">Razonamiento Lógico</button>
-        <button data-m="Comprensión Lectora" class="tab rounded-xl px-3 py-1">Comprensión Lectora</button>
-        <button data-m="Examen UTP" class="tab rounded-xl px-3 py-1">Examen UTP</button>
-        <button data-m="Examen UP" class="tab rounded-xl px-3 py-1">Examen UP</button>
-        <span class="ml-auto text-sm text-gray-600">Top <select id="limit" class="border rounded px-2 py-1 text-sm"><option>10</option><option selected>50</option><option>100</option></select></span>
-      </div>
-      <div id="status" class="mt-3 text-sm text-gray-600">Cargando…</div>
-      <div id="list" class="mt-2"></div>
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <h1 style="font-size:22px;margin:0">Ranking global</h1>
+      <span id="lastUpdate" class="mut"></span>
     </div>
+    <div id="status" class="mut">Cargando…</div>
+    <table id="tbl" style="display:none">
+      <thead><tr><th>#</th><th>Nombre</th><th>Universidad</th><th>Prueba</th><th>Puntaje</th><th>Fecha</th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
   </div>
 
 <script>
-const tabs = document.querySelectorAll('.tab');
-const list = document.getElementById('list');
-const status = document.getElementById('status');
-const limitSel = document.getElementById('limit');
-let current = 'Álgebra Básica';
+(async function(){
+  const st = document.getElementById('status');
+  const tbl = document.getElementById('tbl');
+  const rows = document.getElementById('rows');
+  document.getElementById('lastUpdate').textContent = new Date().toLocaleString('es-PA');
 
-tabs.forEach(b=> b.addEventListener('click', ()=>{ tabs.forEach(x=>x.className='tab rounded-xl px-3 py-1'); b.className='tab rounded-xl px-3 py-1 bg-indigo-600 text-white'; current = b.dataset.m; load(); }));
-limitSel.addEventListener('change', load);
+  let data=null;
+  try{ const r=await fetch('/api/leaderboard'); if(r.ok) data=await r.json(); }catch(e){}
+  if(!data){ try{ const r=await fetch('/api/scores'); if(r.ok) data=await r.json(); }catch(e){} }
 
-async function load(){
-  status.textContent='Cargando…'; list.innerHTML='';
-  try{
-    const r = await fetch('/api/leaderboard?module='+encodeURIComponent(current)+'&limit='+limitSel.value);
-    const j = await r.json();
-    if(!j.ok){ status.textContent='No se pudo cargar.'; return; }
-    status.textContent = 'Top '+ (j.top?.length || 0) +' — ' + current;
-    const rows = (j.top || []).map((r,idx)=>{
-      const mm = Math.floor(r.ms/60000), ss = String(Math.floor(r.ms/1000)%60).padStart(2,'0');
-      const d = new Date(r.at).toLocaleDateString();
-      return `<div class="grid grid-cols-12 gap-2 border-b py-2 text-sm">
-        <div class="col-span-1 font-semibold">#${idx+1}</div>
-        <div class="col-span-5">${r.email}</div>
-        <div class="col-span-3">${r.score}/${r.total}</div>
-        <div class="col-span-2">${mm}:${ss}</div>
-        <div class="col-span-1 text-right">${d}</div>
-      </div>`;
-    }).join('');
-    list.innerHTML = `<div class="grid grid-cols-12 gap-2 border-b py-2 text-xs text-gray-600">
-        <div class="col-span-1">Pos</div>
-        <div class="col-span-5">Estudiante</div>
-        <div class="col-span-3">Puntaje</div>
-        <div class="col-span-2">Tiempo</div>
-        <div class="col-span-1 text-right">Fecha</div>
-      </div>` + rows;
-  }catch(e){
-    status.textContent='Error de red';
-  }
-}
-load();
+  if(!Array.isArray(data)){ st.textContent='No hay datos del ranking todavía.'; return; }
+
+  st.style.display='none'; tbl.style.display='table';
+  const fmt=(d)=> new Date(d).toLocaleDateString('es-PA',{day:'2-digit',month:'2-digit',year:'numeric'});
+  data.slice(0,50).forEach((it,idx)=>{
+    const tr=document.createElement('tr');
+    const uni = it.university || it.uni || '—';
+    const nm  = it.name || it.nick || (it.email? it.email.split('@')[0] : '—');
+    const test= it.topic || it.test || 'General';
+    const score = (it.score !== undefined) ? it.score : (it.points !== undefined ? it.points : 0);
+    const dt  = it.created_at || it.date || new Date().toISOString();
+    tr.innerHTML = '<td>'+ (idx+1) +'</td><td>'+ nm +'</td><td>'+ uni +'</td><td><span class="badge">'+ test +'</span></td><td>'+ score +'</td><td>'+ fmt(dt) +'</td>';
+    rows.appendChild(tr);
+  });
+})();
 </script>
 </body>
 </html>

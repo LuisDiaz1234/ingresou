@@ -1,128 +1,127 @@
-<!doctype html>
+
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>IngresoU — Comprensión Lectora — 10 preguntas</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style> body{background:#f6f7ff} </style>
+  <title>IngresoU — Práctica Comprensión Lectora</title>
+  <!-- PAGES PATCH 1755048408 -->
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,"Noto Sans",sans-serif;max-width:960px;margin:40px auto;padding:0 16px;color:#111}
+    .card{border:1px solid #E5E7EB;border-radius:12px;padding:16px;background:#fff;margin-top:12px}
+    .mut{color:#6B7280}
+    .btn{background:#4F46E5;color:#fff;border:none;border-radius:8px;padding:8px 12px;cursor:pointer}
+    .btn-outline{border:1px solid #D1D5DB;background:#fff;border-radius:8px;padding:8px 12px;cursor:pointer}
+    .q{margin-top:12px;padding:12px;border-radius:8px;border:1px solid #E5E7EB;background:#F9FAFB}
+    .ops label{display:block;margin:6px 0}
+    .ok{color:#059669} .err{color:#b91c1c}
+    progress{width:100%}
+  </style>
 </head>
-<body class="text-gray-900">
-  <div class="mx-auto max-w-3xl p-6">
-    <header class="flex items-center justify-between">
-      <h1 class="text-xl font-bold">Comprensión Lectora — 10 preguntas</h1>
-      <div class="flex items-center gap-3">
-        <div class="w-40 h-2 rounded bg-gray-200 overflow-hidden"><div id="pbar" class="h-2 bg-indigo-600" style="width:0%"></div></div>
-        <div id="timer" class="rounded-xl bg-black px-3 py-1 text-white text-sm">--:--</div>
-        <a href="/premium.html" class="rounded-xl border px-3 py-1 text-sm">Salir</a>
-      </div>
-    </header>
+<body>
+  
+<header style="display:flex;justify-content:space-between;align-items:center;padding:12px 0">
+  <div style="font-weight:700;font-size:20px;">IngresoU</div>
+  <nav style="display:flex;gap:12px;">
+    <a href="/premium.html">Mi cuenta</a>
+    <a href="/leaderboard.html">Ranking</a>
+  </nav>
+</header>
 
-    <div id="app" class="mt-4 rounded-2xl bg-white p-5 ring-1 ring-gray-200 shadow"></div>
+  
+<script>
+(function(){
+  const code = localStorage.getItem('ingresou_key');
+  const email = localStorage.getItem('ingresou_email');
+  if (!code || !email){
+    location.href = '/';
+  }
+})();
+</script>
+
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+      <h1 style="font-size:22px;margin:0">Práctica — Comprensión Lectora</h1>
+      <div class="mut" id="session"></div>
+    </div>
+    <div class="mut">10 preguntas • tiempo cronometrado</div>
+    <progress id="prog" value="0" max="10"></progress>
+
+    <div id="qwrap"></div>
+
+    <div style="display:flex;gap:8px;margin-top:12px;">
+      <button id="prev" class="btn-outline">Anterior</button>
+      <button id="next" class="btn">Siguiente</button>
+      <button id="finish" class="btn" style="display:none;background:#059669">Finalizar</button>
+    </div>
+
+    <div id="result" style="display:none;margin-top:12px;"></div>
   </div>
 
-
 <script>
-async function ensureSession(){
-  const s = JSON.parse(localStorage.getItem('ingresou_session')||'null');
-  if(!s){ location.href = '/premium.html'; return null; }
-  try{
-    const r = await fetch('/api/get-subscription', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ code: s.code, email: s.email })});
-    const data = await r.json();
-    if(!(r.ok && data.ok)){ location.href = '/premium.html'; return null; }
-    return {session:s, sub:data};
-  }catch(e){ location.href = '/premium.html'; return null; }
-}
-</script>
+const TOPIC = 'lectura';
+const SAMPLES = [{"question": "Un texto dice: “La fotosíntesis produce oxígeno”. ¿Cuál es el producto principal mencionado?", "choices": ["Dióxido de carbono", "Oxígeno", "Glucosa", "Agua"], "answer_index": 1}, {"question": "Si un párrafo introduce un concepto y los siguientes lo explican, ¿qué función cumple el primero?", "choices": ["Conclusión", "Introducción/tesis", "Ejemplo", "Definición"], "answer_index": 1}, {"question": "¿Qué conector expresa causa?", "choices": ["Sin embargo", "Por lo tanto", "Porque", "Aunque"], "answer_index": 2}, {"question": "Si el autor usa datos y estadísticas, su intención es:", "choices": ["Entretener", "Convencer con evidencia", "Narrar ficción", "Describir un paisaje"], "answer_index": 1}, {"question": "¿Qué significa ‘síntesis’ al estudiar?", "choices": ["Memorizar sin entender", "Repetir el texto", "Resumir y conectar ideas", "Leer rápido"], "answer_index": 2}, {"question": "Un ‘sinónimo’ de ‘rápido’ es:", "choices": ["Lento", "Veloz", "Tardío", "Pausado"], "answer_index": 1}, {"question": "En una noticia, el ‘lead’ responde a:", "choices": ["Quién, qué, cuándo, dónde, por qué, cómo", "Solo quién y qué", "Solo cuándo y dónde", "Solo por qué"], "answer_index": 0}, {"question": "‘Inferir’ significa:", "choices": ["Copiar textual", "Adivinar sin base", "Deducir a partir de pistas", "Traducir"], "answer_index": 2}, {"question": "Si un texto es ‘objetivo’, entonces:", "choices": ["Expresa opiniones", "Usa adjetivos emocionales", "Presenta hechos verificables", "Es una carta personal"], "answer_index": 2}, {"question": "¿Qué gráfico ayuda a comparar porcentajes?", "choices": ["Línea de tiempo", "Mapa mental", "Gráfico de pastel", "Diagrama de flujo"], "answer_index": 2}];
 
+function ls(k){try{return localStorage.getItem(k)||''}catch{return ''}}
+function obfuscEmail(e){ if(!e) return ''; const p=e.split('@')[0]; return p.length>2 ? p.slice(0,2)+'***' : p; }
 
-<script>
-function shuffle(arr){ for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; } return arr; }
-function pickN(arr,n){ const a=[...arr]; shuffle(a); return a.slice(0, Math.min(n,a.length)); }
-function saveLocal(moduleName, score, total, ms){
-  try{ const key='ingresou_results'; const list=JSON.parse(localStorage.getItem(key)||'[]'); list.unshift({module:moduleName,score,total,ms,ts:Date.now()}); while(list.length>50) list.pop(); localStorage.setItem(key, JSON.stringify(list)); }catch(e){}
-}
-function fmtMs(ms){ const s=Math.max(0,Math.round(ms/1000)); const m=Math.floor(s/60), r=s%60; return String(m).padStart(2,'0')+':'+String(r).padStart(2,'0'); }
-async function submitGlobal(moduleName, score, total, ms){
-  const s = JSON.parse(localStorage.getItem('ingresou_session')||'null'); if(!s) return {ok:false};
-  try{
-    const r = await fetch('/api/submit-score', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ code: s.code, email: s.email, module: moduleName, score, total, ms })});
-    return await r.json();
-  }catch(e){ return {ok:false}; }
-}
-async function fetchTop(moduleName, limit=10){
-  try{ const r= await fetch('/api/top-scores?module='+encodeURIComponent(moduleName)+'&limit='+limit); const j= await r.json(); return j && j.ok ? j.top : []; }catch(e){ return []; }
-}
-</script>
-
-<script>
-const MODULE_NAME = "Comprensión Lectora";
-const TOTAL_SECONDS = 12*60;
-
-async function loadBank(){
-  const r = await fetch("/bank/lectura.json"); const data = await r.json();
-  // pick random 10 and shuffle options
-  const qs = pickN(data, 10).map(q=>({...q, options: shuffle([...q.options])}));
-  // fix answer indices after shuffle
-  for(const q of qs){ const correctText = data.find(x=>x.q===q.q).options[data.find(x=>x.q===q.q).a]; q.a = q.options.indexOf(correctText); }
-  return qs;
+async function getQuestions(topic, count){
+  try{ 
+    const r = await fetch('/api/generate-questions',{ method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ topic, count }) });
+    if(r.ok){ const j=await r.json(); if(Array.isArray(j) && j.length) return j.slice(0,count); }
+  }catch(e){ console.warn('API fallback', e); }
+  return SAMPLES.slice(0, count);
 }
 
-function startQuiz(QUESTIONS){
-  let i=0; let finished=false; const answers=new Array(QUESTIONS.length).fill(null);
-  const root=document.getElementById('app'); const pbar=document.getElementById('pbar'); const timer=document.getElementById('timer');
-  let remaining=TOTAL_SECONDS; timer.textContent=fmtMs(remaining); const tHandle=setInterval(()=>{ if(finished) return; remaining--; if(remaining<=0){remaining=0; finished=true; render();} timer.textContent=fmtMs(remaining); },1000);
+function renderQuestion(q, idx, sel){
+  const wrap = document.getElementById('qwrap');
+  const ops = q.choices.map((c,i)=>'<label><input type="radio" name="op" value="'+i+'" '+(sel===i?'checked':'')+'> '+c+'</label>').join('');
+  wrap.innerHTML = '<div class="q"><div style="font-weight:600;margin-bottom:8px;">'+(idx+1)+') '+q.question+'</div><div class="ops">'+ops+'</div></div>';
+}
 
-  async function render(){
-    root.innerHTML=''; pbar.style.width=Math.round((i/QUESTIONS.length)*100)+'%';
-    if(!finished){
-      const q=QUESTIONS[i];
-      const wrap=document.createElement('div'); wrap.innerHTML=`
-        <div class="text-sm text-gray-600">Pregunta ${i+1} de ${QUESTIONS.length}</div>
-        <div class="mt-2 text-lg font-medium">${q.q}</div>
-        <div class="mt-4 space-y-2"></div>
-        <div class="mt-4 flex justify-between">
-          <button id="prevBtn" class="rounded-xl border px-4 py-2">Anterior</button>
-          <button id="nextBtn" class="rounded-xl bg-indigo-600 px-4 py-2 text-white">${i<QUESTIONS.length-1?'Siguiente':'Finalizar'}</button>`;
-      const list=wrap.children[2];
-      q.options.forEach((opt,idx)=>{ const b=document.createElement('button'); b.className="w-full rounded-xl border px-4 py-2 text-left hover:bg-gray-50 " + (answers[i]===idx?"ring-2 ring-indigo-500":""); b.innerHTML=`<span class="mr-2">${String.fromCharCode(65+idx)}.</span> ${opt}`; b.onclick=()=>{ answers[i]=idx; render(); }; list.appendChild(b); });
-      root.appendChild(wrap);
-      document.getElementById('prevBtn').onclick=()=>{ if(i>0){i--; render();} };
-      document.getElementById('nextBtn').onclick=()=>{ if(i<QUESTIONS.length-1){i++; render();} else {finished=true; render();} };
-    } else {
-      clearInterval(tHandle); pbar.style.width='100%'; const elapsed=(TOTAL_SECONDS-remaining)*1000;
-      let correct=0; let review=''; QUESTIONS.forEach((q,idx)=>{ const ok=answers[idx]===q.a; if(ok) correct++; const chosen=answers[idx]==null?'—':q.options[answers[idx]]; review += `
-        <div class="rounded-xl border p-3 mt-3">
-          <div class="text-sm ${ok?'text-green-700':'text-red-700'}">${ok?'✔ Correcto':'✖ Incorrecto'}</div>
-          <div class="mt-1 font-medium">${q.q}</div>
-          <div class="mt-1 text-sm"><b>Tu respuesta:</b> ${chosen}</div>
-          <div class="mt-1 text-sm"><b>Correcta:</b> ${q.options[q.a]}</div>
-          <div class="mt-1 text-sm text-gray-700">${q.exp||''}</div>
-        </div>`; });
-      saveLocal(MODULE_NAME, correct, QUESTIONS.length, elapsed);
-      const global = await submitGlobal(MODULE_NAME, correct, QUESTIONS.length, elapsed);
-      const top = global && global.ok ? global.top : await fetchTop(MODULE_NAME,10);
-      const topHtml=(top||[]).map((r,idx)=>{ const mm=Math.floor(r.ms/60000), ss=String(Math.floor(r.ms/1000)%60).padStart(2,'0'); const d=new Date(r.created_at).toLocaleDateString(); return `<div class="flex justify-between text-sm"><span>#${idx+1} — ${r.score}/${r.total}</span><span>${mm}:${ss} · ${d}</span></div>`; }).join('');
-      const wrap=document.createElement('div'); wrap.innerHTML=`
-        <div class="text-lg font-semibold">Resultado: ${correct} / ${QUESTIONS.length}</div>
-        <div class="text-sm text-gray-600">Tiempo usado: ${fmtMs(elapsed)}</div>
-        <div class="mt-3">
-          <a href="/premium.html" class="rounded-xl bg-black px-4 py-2 text-white">Volver a Mi cuenta</a>
-          <button id="retry" class="ml-2 rounded-xl border px-4 py-2">Reintentar</button>
-        </div>
-        <div class="mt-6 rounded-2xl bg-indigo-50 p-4">
-          <div class="text-sm font-semibold text-indigo-900">Ranking global (Top 10)</div>
-          <div class="mt-2">${topHtml || '<div class="text-sm">Aún no hay registros.</div>'}</div>
-        </div>
-        <div class="mt-4">${review}</div>`;
-      root.appendChild(wrap);
-      document.getElementById('retry').onclick=()=>{ location.reload(); };
-    }
+(async function(){
+  document.getElementById('session').textContent = obfuscEmail(ls('ingresou_email'))+' • KEY: '+(ls('ingresou_key')||'').slice(0,4)+'***';
+  const qs = await getQuestions(TOPIC, 10);
+  let i=0; let answers = new Array(qs.length).fill(null); let start=Date.now();
+  const prog=document.getElementById('prog'), prev=document.getElementById('prev'),
+        next=document.getElementById('next'), finish=document.getElementById('finish'),
+        result=document.getElementById('result');
+
+  function updateButtons(){
+    prev.disabled = i===0;
+    next.style.display = i<qs.length-1 ? 'inline-block' : 'none';
+    finish.style.display = i===qs.length-1 ? 'inline-block' : 'none';
+    prog.value = answers.filter(x=>x!==null).length;
   }
-  render();
-}
 
-ensureSession().then(async s=>{ if(!s) return; const qs=await loadBank(); startQuiz(qs); });
+  function currentSelection(){
+    const el = document.querySelector('input[name="op"]:checked');
+    return el ? parseInt(el.value,10) : null;
+  }
+
+  function saveSelection(){
+    const v = currentSelection();
+    if (v!==null) answers[i]=v;
+  }
+
+  renderQuestion(qs[i], i, answers[i]); updateButtons();
+
+  document.getElementById('qwrap').addEventListener('change', saveSelection);
+  prev.onclick = ()=>{ if(i>0){ saveSelection(); i--; renderQuestion(qs[i], i, answers[i]); updateButtons(); } };
+  next.onclick = ()=>{ if(i<qs.length-1){ saveSelection(); i++; renderQuestion(qs[i], i, answers[i]); updateButtons(); } };
+  finish.onclick = async ()=>{ saveSelection();
+    const dur = Math.round((Date.now()-start)/1000);
+    const score = answers.reduce((acc,v,idx)=> acc + (v===qs[idx].answer_index?1:0), 0);
+    result.style.display='block';
+    result.innerHTML = '<div class="q"><div><strong>Resultado:</strong> '+score+' / '+qs.length+'</div><div class="mut">Tiempo: '+dur+' s • Tema: '+TOPIC+'</div></div>';
+
+    try{
+      const payload = { email: ls('ingresou_email'), code: ls('ingresou_key'), topic: TOPIC, score, duration: dur, ts: new Date().toISOString() };
+      const r = await fetch('/api/submit-score',{ method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+      if(r.ok){ const j=await r.json(); console.log('submit-score', j); }
+    }catch(e){ console.warn('submit-score fallback', e); }
+  };
+})();
 </script>
 </body>
 </html>
