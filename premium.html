@@ -100,27 +100,19 @@
     const card  = document.getElementById('login-card');
     const mods  = document.getElementById('modules');
 
-    document.getElementById('logout-btn').onclick = ()=>{ localStorage.clear(); location.reload(); };
+    document.getElementById('logout-btn').onclick = ()=>{ localStorage.clear(); location.href='/'; };
 
     if (code && email){
       try {
         const sub = await fetchSub(code,email);
         if (sub?.ok === false){
-          // Mostrar login
-          acc.style.display = 'none';
-          mods.style.display = 'none';
-          card.style.display = 'block';
+          acc.style.display = 'none'; mods.style.display = 'none'; card.style.display = 'block';
         } else {
           fillAccount(sub);
-          acc.style.display = 'block';
-          mods.style.display = 'block';
-          card.style.display = 'none';
+          acc.style.display = 'block'; mods.style.display = 'block'; card.style.display = 'none';
         }
-      } catch {
-        // Mostrar login en caso de error
-        acc.style.display = 'none';
-        mods.style.display = 'none';
-        card.style.display = 'block';
+      } catch(e) {
+        console.error(e); acc.style.display='none'; mods.style.display='none'; card.style.display='block';
       }
     } else {
       card.style.display = 'block';
@@ -129,7 +121,7 @@
   document.addEventListener('DOMContentLoaded', init);
   </script>
 
-  <script src="/assets/ingresou-login.js"></script>
-  <script src="/assets/renewal-banner.js"></script>
+  <script src="/assets/ingresou-login.js?v=5"></script>
+  <script src="/assets/renewal-banner.js?v=5"></script>
 </body>
 </html>

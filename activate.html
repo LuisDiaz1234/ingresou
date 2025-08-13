@@ -24,21 +24,11 @@
     if (!code || !email){ set('Falta code o email en la URL.', 'err'); return; }
 
     try{
-      // Redime si corresponde
-      const r1 = await fetch('/api/redeem-key', {
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ code, email })
-      });
+      const r1 = await fetch('/api/redeem-key', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ code, email }) });
       const j1 = await r1.json();
-      if (j1?.ok !== true && j1?.error !== 'ALREADY_REDEEMED'){
-        set('No se pudo activar: ' + (j1?.error || 'ERROR'), 'err'); return;
-      }
+      if (j1?.ok !== true && j1?.error !== 'ALREADY_REDEEMED'){ set('No se pudo activar: ' + (j1?.error || 'ERROR'), 'err'); return; }
 
-      // Verifica y guarda
-      const r2 = await fetch('/api/get-subscription', {
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ code, email })
-      });
+      const r2 = await fetch('/api/get-subscription', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ code, email }) });
       const sub = await r2.json();
       if (sub?.ok === false){ set('Error: ' + (sub?.error || 'ERROR'), 'err'); return; }
 
