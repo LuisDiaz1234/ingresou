@@ -4,26 +4,62 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>IngresoU — Mi cuenta</title>
-  <style>body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,"Noto Sans",sans-serif;max-width:960px;margin:40px auto;padding:0 16px;color:#111}</style>
+  <style>
+    :root{--b:#E5E7EB;--bg:#F9FAFB;--ink:#111;--mut:#6B7280;--brand:#4F46E5}
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,"Noto Sans",sans-serif;max-width:1024px;margin:40px auto;padding:0 16px;color:var(--ink)}
+    .box{border:1px solid var(--b);border-radius:12px;padding:16px;background:#fff}
+    .tag{font-size:12px;color:var(--mut)}
+    .grid{display:grid;gap:12px}
+    @media(min-width:768px){.grid-3{grid-template-columns:repeat(3,minmax(0,1fr));}}
+    .card{background:var(--bg);border:1px solid var(--b);border-radius:12px;padding:12px}
+    .btn{display:inline-block;background:#4F46E5;color:#fff;padding:8px 12px;border-radius:8px;text-decoration:none;border:none;cursor:pointer}
+    .btn-outline{border:1px solid var(--b);background:#fff;color:var(--ink)}
+    .hdr{display:flex;justify-content:space-between;align-items:center}
+    .mut{color:var(--mut)}
+    a{color:#1f3fb8}
+  </style>
 </head>
 <body>
-  <header style="display:flex;justify-content:space-between;align-items:center;">
+  <header class="hdr">
     <h1 style="font-size:28px;font-weight:700;margin-bottom:8px;">IngresoU — Mi cuenta</h1>
     <div>
       <a href="/ranking.html" style="margin-right:8px;">Ver ranking</a>
-      <button id="logout-btn" style="border:1px solid #D1D5DB;border-radius:8px;padding:6px 10px;">Cerrar sesión</button>
+      <button id="logout-btn" class="btn btn-outline">Cerrar sesión</button>
     </div>
   </header>
 
-  <section id="account" style="display:none;margin-top:12px;border:1px solid #E5E7EB;border-radius:12px;padding:16px;"></section>
+  <!-- Datos de la suscripción -->
+  <section id="account" class="box" style="display:none;margin-top:12px;"></section>
+
+  <!-- Módulos Premium -->
+  <section id="modules" class="box" style="display:none;margin-top:16px;">
+    <div style="font-weight:600;margin-bottom:8px;">Módulos Premium</div>
+    <div class="grid grid-3">
+      <div class="card">
+        <div style="font-weight:600;">Álgebra Básica</div>
+        <div class="mut" style="margin:4px 0 8px;">Ecuaciones, factorización, proporciones.</div>
+        <a href="/practice-algebra.html" class="btn">Practicar 10 preguntas</a>
+      </div>
+      <div class="card">
+        <div style="font-weight:600;">Razonamiento Lógico</div>
+        <div class="mut" style="margin:4px 0 8px;">Series, patrones y analogías.</div>
+        <a href="/practice-logico.html" class="btn">Practicar 10 preguntas</a>
+      </div>
+      <div class="card">
+        <div style="font-weight:600;">Comprensión Lectora</div>
+        <div class="mut" style="margin:4px 0 8px;">Lecturas cortas con preguntas.</div>
+        <a href="/practice-lectura.html" class="btn">Practicar 10 preguntas</a>
+      </div>
+    </div>
+  </section>
 
   <!-- Login fallback (si no hay sesión) -->
-  <section id="login-card" class="rounded-xl" style="margin-top:20px;border:1px solid #E5E7EB;border-radius:12px;padding:16px;">
+  <section id="login-card" class="box" style="margin-top:20px;display:none;">
     <h3 style="font-weight:600;margin-bottom:8px;">Inicia sesión con tu KEY</h3>
     <form id="key-login-form" onsubmit="return false;" style="display:grid;gap:8px;max-width:520px;">
-      <input id="key-input" type="text" placeholder="UTP-XXXX-YYYY" autocomplete="off" style="border:1px solid #D1D5DB;border-radius:8px;padding:10px;"/>
-      <input id="email-input" type="email" placeholder="correo@ejemplo.com" autocomplete="email" style="border:1px solid #D1D5DB;border-radius:8px;padding:10px;"/>
-      <button id="login-btn" style="background:#4F46E5;color:#fff;border:none;border-radius:8px;padding:10px 14px;cursor:pointer;">Entrar</button>
+      <input id="key-input" type="text" placeholder="UTP-XXXX-YYYY" autocomplete="off" style="border:1px solid var(--b);border-radius:8px;padding:10px;"/>
+      <input id="email-input" type="email" placeholder="correo@ejemplo.com" autocomplete="email" style="border:1px solid var(--b);border-radius:8px;padding:10px;"/>
+      <button id="login-btn" class="btn">Entrar</button>
       <div id="login-status" style="font-size:12px;"></div>
     </form>
   </section>
@@ -41,17 +77,17 @@
     const el = document.getElementById('account');
     el.innerHTML = `
       <div style="font-weight:600;margin-bottom:8px;">Tu suscripción</div>
-      <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;">
-        <div style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;padding:12px;">
-          <div style="font-size:12px;color:#6B7280;">Universidad</div>
+      <div class="grid grid-3">
+        <div class="card">
+          <div class="tag">Universidad</div>
           <div style="font-weight:600;">${s.university || '-'}</div>
         </div>
-        <div style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;padding:12px;">
-          <div style="font-size:12px;color:#6B7280;">Plan</div>
+        <div class="card">
+          <div class="tag">Plan</div>
           <div style="font-weight:600;">${s.plan || '-'}</div>
         </div>
-        <div style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;padding:12px;">
-          <div style="font-size:12px;color:#6B7280;">Vence</div>
+        <div class="card">
+          <div class="tag">Vence</div>
           <div style="font-weight:600;">${(s.expires_at||'').slice(0,10)}</div>
         </div>
       </div>
@@ -62,6 +98,7 @@
     const email = localStorage.getItem('ingresou_email');
     const acc   = document.getElementById('account');
     const card  = document.getElementById('login-card');
+    const mods  = document.getElementById('modules');
 
     document.getElementById('logout-btn').onclick = ()=>{ localStorage.clear(); location.reload(); };
 
@@ -69,15 +106,20 @@
       try {
         const sub = await fetchSub(code,email);
         if (sub?.ok === false){
-          // Si falla, muestra login
+          // Mostrar login
           acc.style.display = 'none';
+          mods.style.display = 'none';
           card.style.display = 'block';
         } else {
           fillAccount(sub);
           acc.style.display = 'block';
+          mods.style.display = 'block';
           card.style.display = 'none';
         }
       } catch {
+        // Mostrar login en caso de error
+        acc.style.display = 'none';
+        mods.style.display = 'none';
         card.style.display = 'block';
       }
     } else {
